@@ -1,0 +1,16 @@
+# Node.js (React)
+node_modules/
+build/
+
+# Laravel
+vendor/
+storage/
+.env
+.env.local
+.env.production
+.env.testing
+
+# IDE et OS
+.vscode/
+.idea/
+.DS_Store
