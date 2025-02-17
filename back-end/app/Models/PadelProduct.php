@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Event extends Model
+class PadelProduct extends Model
 {
     use HasFactory;
 
@@ -13,33 +13,25 @@ class Event extends Model
      * The attributes that are mass assignable.
      * 
      * @var array
-    */
+     */
     protected $fillable = [
-        'title',
-        'start_date',
-        'end_date',
-        'start_time',
-        'end_time',
-        'category',
+        'name',
         'description',
-        'location',
+        'price',
         'image',
+        'type',
     ];
 
     /**
      * The attributes that should be cast to native types.
      * 
      * @var array
-    */
+     */
     protected $casts = [
-        'title' => 'string',
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'start_time' => 'time',
-        'end_time' => 'time',
-        'category' => 'string',
+        'name' => 'string',
         'description' => 'string',
-        'location' => 'string',
+        'price' => 'float',
         'image' => 'string',
+        'type' => 'string',
     ];
 }

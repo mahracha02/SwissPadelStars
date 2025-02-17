@@ -7,6 +7,7 @@ use Filament\Panel;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -69,5 +70,15 @@ class User extends Authenticatable implements FilamentUser
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Get the role that owns the user.
+     * 
+     * @return BelongsTo
+     */
+    public function role() : BelongsTo
+    {
+        return $this->belongsTo(Role::class);
     }
 }
