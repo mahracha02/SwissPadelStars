@@ -13,7 +13,7 @@ class Event extends Model
      * The attributes that are mass assignable.
      * 
      * @var array
-    */
+     */
     protected $fillable = [
         'title',
         'start_date',
@@ -30,7 +30,7 @@ class Event extends Model
      * The attributes that should be cast to native types.
      * 
      * @var array
-    */
+     */
     protected $casts = [
         'title' => 'string',
         'start_date' => 'date',
@@ -42,4 +42,5 @@ class Event extends Model
         'location' => 'string',
         'image' => 'string',
     ];
+
 }

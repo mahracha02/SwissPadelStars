@@ -1,12 +1,14 @@
 <?php
 
+use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-//create a route to get access to the admin panel
-Route::get('/admin', function () {
-    return view('admin');
+require __DIR__.'/auth.php';
+
+Route::get('/', function () {
+    Route::get('/', Dashboard::class)->name('dashboard');
 });

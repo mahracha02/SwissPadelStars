@@ -2,36 +2,35 @@
 
 namespace App\Models;
 
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable, InteractsWithMedia;
 
-    /** 
+    /**
      * The attributes that are mass assignable.
-     * 
-     * @var array
+     *
+     * @var list<string>
      */
     protected $fillable = [
-        'firstname',
-        'lastname',
+        'name',
         'email',
         'password',
         'phone',
         'role',
     ];
 
-
     /**
-     * The attributes that should be hidden for arrays.
-     * 
-     * @var array
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -39,45 +38,21 @@ class User extends Authenticatable implements FilamentUser
     ];
 
     /**
-     * @return bool
-     */
-    public function viewAny(User $user): bool
-    {
-        return $user->exists();
-    }
-
-
-    /**
-     * The attributes that should be cast to native types.
-     * 
-     * @var array
-     */
-    protected $casts = [
-        'firstname' => 'string',
-        'lastname' => 'string',
-        'email' => 'string',
-        'phone' => 'string',
-        'role' => 'string',
-        'email_verified_at' => 'datetime',
-    ];
-
-
-    /**
-     * Authorize the user to access the admin panel.
+     * Get the attributes that should be cast.
      *
-     * @return string
+     * @return array<string, string>
      */
-    public function canAccessPanel(Panel $panel): bool
+    protected function casts(): array
     {
-        return $this->role === 'admin';
+        return [
+            'name' => 'string',
+            'email' => 'string',
+            'phone' => 'string',
+            'role' => 'string',
+        ];
     }
 
-    /**
-     * Get the role that owns the user.
-     * 
-     * @return BelongsTo
-     */
-    public function role() : BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
