@@ -5,10 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Filament\Admin\Resources\UserResource\RelationManagers;
 use App\Models\User;
-use Faker\Provider\ar_EG\Text;
 use Filament\Forms;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -26,36 +23,7 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('firstname')
-                    ->required()
-                    ->label('First Name')
-                    ->placeholder('John'),
-                TextInput::make('lastname')
-                    ->required()
-                    ->label('Last Name')
-                    ->placeholder('Doe'),
-                TextInput::make('email')
-                    ->required()
-                    ->label('Email')
-                    ->placeholder('example@mail.com'),
-                TextInput::make('password')
-                    ->required()
-                    ->label('Password')
-                    ->placeholder('********'),
-                TextInput::make('phone')
-                    ->required()
-                    ->label('Phone')
-                    ->placeholder('1234567890'),
-                Select::make('role')
-                    ->required()
-                    ->label('Role')
-                    //get the options from the role table in the database
-                    ->options([
-                        'superadmin' => 'Super Admin',
-                        'admin' => 'Admin',
-                        'user' => 'User',
-                    ]),
-                
+                //
             ]);
     }
 
@@ -63,27 +31,7 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('firstname')
-                    ->primary()
-                    ->label('First Name')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('lastname')
-                    ->label('Last Name')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('Email')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('Phone')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('role')
-                    ->label('Role')
-                    ->searchable()
-                    ->sortable(),
+                //
             ])
             ->filters([
                 //
