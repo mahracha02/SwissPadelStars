@@ -4,15 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, InteractsWithMedia;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,8 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'phone',
-        'role',
+        'role_id',
     ];
 
     /**
@@ -45,14 +42,15 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'name' => 'string',
-            'email' => 'string',
-            'phone' => 'string',
-            'role' => 'string',
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
         ];
     }
 
-    public function role(): BelongsTo
+    /**
+     * Get the role that the user belongs to.
+     */
+    public function role()
     {
         return $this->belongsTo(Role::class);
     }
