@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { ChevronRight, Menu as MenuIcon, X } from 'lucide-react';
-import Logo from '../assets/images/logoSwissPadel.png';
+import { Link, useLocation } from 'react-router-dom';
+import Logo1 from '../assets/images/logoSwissPadel.png';
+import Logo2 from '../assets/images/logo2.png';
 
 export default function Menu() {
   const [isOpen, setIsOpen] = useState(false);
   const [isServiceOpen, setIsServiceOpen] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   const closeMenu = () => {
     setIsOpen(false);
@@ -14,20 +18,34 @@ export default function Menu() {
   return (
     <>
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-900 to-black text-white flex justify-between items-center px-6 py-4  relative ">
+      <header className={`flex justify-between items-center px-10 py-6 relative ${
+        isHomePage 
+          ? 'bg-gradient-to-r from-blue-900 to-black text-white' 
+          : 'bg-transparent text-black'
+      }`}>
         <button
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 text-lg font-medium hover:text-[#646cff] transition mt-4 ml-4"
+          className={`flex items-center gap-2 text-lg font-medium transition mt-4 ml-4 ${
+            isHomePage ? 'hover:text-[#646cff]' : 'hover:text-blue-900'
+          }`}
         >
           <MenuIcon />
           <span>Menu</span>
         </button>
 
-        <div className="absolute left-1/2 transform -translate-x-1/2 ">
-          <img src={Logo} alt="Logo" className="h-20 w-auto mt-4" />
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <Link to="/">
+            {isHomePage ? (
+                <img src={Logo1} alt="Logo" className="h-20 w-30" />
+              ) : (
+                <img src={Logo2} alt="Logo" className="h-20 w-30" />
+
+              ) 
+            }
+          </Link>
         </div>
 
-        <div className="font-medium mt-4">FR</div>
+        <div className={`font-medium text-2xl mt-4 ${isHomePage ? 'text-white' : 'text-black'}`}>FR</div>
       </header>
 
       {/* Menu Overlay */}
@@ -54,7 +72,11 @@ export default function Menu() {
             </div>
 
             <ul className="px-6 space-y-6 text-lg animate-fadeIn">
-              <li className="cursor-pointer hover:text-[#646cff] transition duration-200">Accueil</li>
+              <li>
+                <Link to="/" className="block hover:text-[#646cff] transition duration-200" onClick={closeMenu}>
+                  Accueil
+                </Link>
+              </li>
 
               <li
                 className="cursor-pointer flex justify-between items-center border border-[#646cff] rounded-lg px-4 py-2 hover:bg-[#f0f0f0] transition duration-200"
@@ -63,24 +85,46 @@ export default function Menu() {
                 Nos services <ChevronRight size={20} />
               </li>
 
-              <li className="cursor-pointer hover:text-[#646cff] transition duration-200">Nos évènements</li>
-              <li className="cursor-pointer hover:text-[#646cff] transition duration-200">Nos sponsors</li>
-              <li className="cursor-pointer hover:text-[#646cff] transition duration-200">Notre galerie</li>
-              <li className="cursor-pointer hover:text-[#646cff] transition duration-200">Contact</li>
+              <li>
+                <Link to="/evenements" className="block hover:text-[#646cff] transition duration-200" onClick={closeMenu}>
+                  Nos évènements
+                </Link>
+              </li>
+              <li>
+                <Link to="/sponsors" className="block hover:text-[#646cff] transition duration-200" onClick={closeMenu}>
+                  Nos sponsors
+                </Link>
+              </li>
+              <li>
+                <Link to="/galerie" className="block hover:text-[#646cff] transition duration-200" onClick={closeMenu}>
+                  Notre galerie
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="block hover:text-[#646cff] transition duration-200" onClick={closeMenu}>
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Panel Droite (sous-menu services) */}
           {isServiceOpen && (
-            <div
-              className="h-full w-[30%] hidden md:flex bg-blue-100 text-black flex-col justify-center items-start p-10 space-y-6 text-lg animate-slideRight shadow-lg rounded-r-2xl"
-            >
-              <button className="w-full text-left hover:text-white hover:bg-[#646cff] px-4 py-2 rounded transition duration-200">
+            <div className="h-full w-[30%] hidden md:flex bg-blue-100 text-black flex-col justify-center items-start p-10 space-y-6 text-lg animate-slideRight shadow-lg rounded-r-2xl">
+              <Link
+                to="/particulier"
+                className="w-full text-left hover:text-white hover:bg-[#646cff] px-4 py-2 rounded transition duration-200"
+                onClick={closeMenu}
+              >
                 Je suis particulier
-              </button>
-              <button className="w-full text-left hover:text-white hover:bg-[#646cff] px-4 py-2 rounded transition duration-200">
+              </Link>
+              <Link
+                to="/professionnel"
+                className="w-full text-left hover:text-white hover:bg-[#646cff] px-4 py-2 rounded transition duration-200"
+                onClick={closeMenu}
+              >
                 Je suis professionnel
-              </button>
+              </Link>
             </div>
           )}
         </div>

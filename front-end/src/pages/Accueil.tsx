@@ -1,9 +1,6 @@
 import React from 'react';
 import { Rocket, Image, ShieldCheck } from 'lucide-react';
 import Slider from "react-slick";
-import '../App.css';
-import Menu from '../layout/Menu';
-import Footer from '../layout/Footer';
 import Image1 from '../assets/images/padel1.png';
 import PadelTennis from '../assets/images/padelTennis.png';
 import PadelPingPong from '../assets/images/padelPingPong.png';
@@ -12,9 +9,8 @@ import PadelSolutions from '../assets/images/padelSolutions.jpg';
 
 const Accueil: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <Menu />
+    <div className="flex flex-col min-h-screen  text-white">
+      
 
       {/* Main Content */}
       <main className="flex-grow">
@@ -102,7 +98,7 @@ const Accueil: React.FC = () => {
         </section>
 
         {/* CEO Section */}
-        <section className="py-16 bg-white text-center">
+        <section className="py-16  text-center text-black">
           <div className="container mx-auto">
             <div className="max-w-md mx-auto">
               <img src={CEO} alt="CEO" className="w-62 h-62 rounded-xl mx-auto mb-4" />
@@ -159,19 +155,19 @@ const Accueil: React.FC = () => {
         </section>
 
         {/* Solutions Section */}
-        <section className="py-16 bg-cover bg-center text-white py-24" style={{ backgroundImage: `url(${PadelSolutions})` }}>
+        <section className=" bg-cover bg-center text-white py-24" style={{ backgroundImage: `url(${PadelSolutions})` }}>
           <div className="container mx-auto text-center">
             <div className="max-w-8xl mx-auto p-6">
-              <h2 className="text-4xl font-bold mb-16">
+              <h2 className="text-5xl font-bold mb-16">
                 Découvrez nos solutions adaptées à tous vos besoins :<br/> particuliers ou professionnels, 
                 choisissez votre expérience padel.
               </h2>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="bg-green-400 text-black py-3 px-6 rounded-full font-medium">
-                  JE SUIS PARTICULIER
+              <div className="flex flex-col sm:flex-row gap-8 justify-center">
+                <button className="bg-yellow-300 text-black py-5 px-15 rounded-full font-medium hover:bg-yellow-400 transition">
+                  <span className="p-4 text-2xl">JE SUIS PARTICULIER</span>
                 </button>
-                <button className="bg-transparent border border-white py-3 px-6 rounded-full font-medium">
-                  JE SUIS PROFESSIONNEL
+                <button className="bg-transparent border border-white py-3 px-15 rounded-full font-medium hover:bg-white hover:text-black transition">
+                  <span className="p-4 text-2xl">JE SUIS PROFESSIONNEL</span>
                 </button>
               </div>
             </div>
@@ -218,8 +214,7 @@ const Accueil: React.FC = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <Footer />
+     
     </div>
   );
 };
