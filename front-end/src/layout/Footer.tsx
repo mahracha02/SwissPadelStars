@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
               <h2 className="text-lg sm:text-xl font-bold">SWISS PADEL STARS</h2>
             </div>
             <p className="text-sm sm:text-base font-bold mb-4">
-              Votre partenaire de référence, <br className="hidden sm:block" /> pour vos projets liés au monde du padel.
+              Votre partenaire de référence,  <br className="hidden sm:block" /> pour vos projets liés au monde du padel.
             </p>
             <p className="text-xs sm:text-sm mt-4 sm:mt-20">Copyright © 2025 SwissPadelStars. Tous droits réservés.</p>
           </div>

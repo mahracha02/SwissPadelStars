@@ -18,10 +18,10 @@ export default function Menu() {
   return (
     <>
       {/* Header */}
-      <header className={`flex justify-between items-center px-10 py-6 relative ${
+      <header className={`flex justify-between items-center px-10 py-6 w-full ${
         isHomePage 
-          ? 'bg-gradient-to-r from-blue-900 to-black text-white' 
-          : 'bg-transparent text-black'
+          ? 'fixed bg-transparent text-white z-50' // Home page
+          : 'static bg-transparent text-black' // Normal flow on other pages
       }`}>
         <button
           onClick={() => setIsOpen(true)}
@@ -110,7 +110,7 @@ export default function Menu() {
 
           {/* Panel Droite (sous-menu services) */}
           {isServiceOpen && (
-            <div className="h-full w-[30%] hidden md:flex bg-blue-100 text-black flex-col justify-center items-start p-10 space-y-6 text-lg animate-slideRight shadow-lg rounded-r-2xl">
+            <div className="h-full w-[30%] hidden md:flex bg-blue-100/50 backdrop-blur-sm text-black flex-col justify-center items-start p-10 space-y-6 text-lg animate-slideRight shadow-lg rounded-r-2xl">
               <Link
                 to="/particulier"
                 className="w-full text-left hover:text-white hover:bg-[#646cff] px-4 py-2 rounded transition duration-200"

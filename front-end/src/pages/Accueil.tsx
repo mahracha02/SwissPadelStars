@@ -9,13 +9,22 @@ import PadelSolutions from '../assets/images/padelSolutions.jpg';
 
 const Accueil: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen  text-white">
-      
-
+    <div className="flex flex-col min-h-screen text-white">
       {/* Main Content */}
       <main className="flex-grow">
-        <section className="bg-gradient-to-r from-blue-900 to-black text-white min-h-screen flex items-center">
-          <div className="container mx-auto flex flex-col md:flex-row items-center px-6 py-12">
+        <section className="relative text-white min-h-screen flex items-center">
+          {/* Background Image Container */}
+          <div className="absolute inset-0 z-0">
+            <img 
+              src={Image1} 
+              alt="Background" 
+              className="w-full h-full object-cover"
+              style={{ filter: 'brightness(0.5)' }}
+            />
+          </div>
+          
+          {/* Content Container */}
+          <div className="container mx-auto flex flex-col md:flex-row items-center px-6 py-12 relative z-10">
             {/* Texte à gauche */}
             <div className="md:w-1/2 mb-12 md:mb-0">
               <h1 className="text-6xl lg:text-5xl font-bold mb-6 text-left">
@@ -33,18 +42,8 @@ const Accueil: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            {/* Image à droite */}
-            <div className="md:w-1/2">
-              <img
-                src={Image1}
-                alt="Joueurs de padel"
-                className="w-full rounded-lg shadow-lg h-200 object-container"
-              />
-            </div>
           </div>
         </section>
-
 
         {/* Padel Tennis Section */}
         <section className="py-16 bg-white mt-24 ">
@@ -56,7 +55,7 @@ const Accueil: React.FC = () => {
 
             {/* Texte  */}
             <div className="md:w-1/2 p-2 flex flex-col justify-center text-left ml-12">
-              <h2 className="text-5xl font-bold mb-12">Padel Tennis</h2>
+              <h2 className="text-5xl font-bold mb-12 text-[#202020]">Padel Tennis</h2>
               <p className="text-2xl text-gray-800 leading-relaxed mb-6">
                 <strong className="font-semibold">L'histoire d'un sport en pleine expansion.</strong> Le padel tennis a été inventé en 1969 par Enrique Corcuera à Acapulco, au Mexique. 
                 Ce sport dynamique et convivial combine des éléments du tennis et du squash, se jouant sur un court plus petit entouré de parois en verre. 
@@ -68,8 +67,6 @@ const Accueil: React.FC = () => {
             </div>
           </div>
         </section>
-
-
 
         {/* Padel PingPong Section */}
         <section className="py-16 bg-white mt-24 ">

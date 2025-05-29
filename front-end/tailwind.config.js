@@ -6,6 +6,12 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        jaune: '#cbf40f',
+        noir: '#202020',
+        bleu: '#1a63a8',
+        blanc: '#ffffff',
+      },
       animation: {
         fadeIn: 'fadeIn 0.5s ease-out forwards',
         slideRight: 'slideRight 0.4s ease-out forwards',
@@ -21,6 +27,6 @@ export default {
         },
       },
     },
-  },  
+  },
   plugins: [],
 }
