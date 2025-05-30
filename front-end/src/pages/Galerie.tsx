@@ -1,11 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
-import {  Image } from 'lucide-react';
+import { Image } from 'lucide-react';
 import Slider from 'react-slick';
-import imagePadel from "../assets/images/padelPingPong.png";
-import PadelSolutions from "../assets/images/padelSolutions.jpg"
+import PadelSolutions from "../assets/images/padelSolutions.jpg";
+
+interface GalleryItem {
+  id: number;
+  title: string;
+  image: string;
+  description: string;
+  published: boolean;
+}
 
 const Galerie: React.FC = () => {
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    fetchGalleryItems();
+  }, []);
+
+  const fetchGalleryItems = async () => {
+    try {
+      const response = await fetch('https://127.0.0.1:8001/api/gallery');
+      if (!response.ok) {
+        throw new Error('Failed to fetch gallery items');
+      }
+      const data = await response.json();
+      // Filter only published items
+      const publishedItems = data.filter((item: GalleryItem) => item.published);
+      setGalleryItems(publishedItems);
+    } catch (error) {
+      console.error('Error fetching gallery items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 5000,
+    beforeChange: (current: number, next: number) => setCurrentSlide(next),
+    customPaging: (i: number) => (
+      <div className={`w-2 h-2 rounded-full mt-4 ${currentSlide === i ? 'bg-primary-500' : 'bg-gray-300'}`} />
+    ),
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Chargement...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -23,42 +83,36 @@ const Galerie: React.FC = () => {
         {/* Image Slider Section */}
         <section className="mb-16 relative">
           <div className="max-w-5xl mx-auto">
-            {/* Slider Navigation */}
-            <button className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg">
-              <span className="sr-only">Previous</span>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg">
-              <span className="sr-only">Next</span>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Main Image */}
-            <div className="aspect-[16/9] overflow-hidden rounded-lg shadow-xl">
-              <img
-                src= {imagePadel}
-                alt="Dans le filage"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Image Caption */}
-            <div className="text-center mt-10 mb-30">
-              <h3 className="text-xl font-semibold">Dans le filage</h3>
-              <p className="text-gray-600 mt-2">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </p>
-            </div>
+            {galleryItems.length > 0 ? (
+              <Slider {...sliderSettings}>
+                {galleryItems.map((item) => (
+                  <div key={item.id} className="outline-none">
+                    <div className="aspect-[16/9] overflow-hidden rounded-lg shadow-xl">
+                      <img
+                        src={`https://127.0.0.1:8001${item.image}`}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="text-center mt-10 mb-30">
+                      <h3 className="text-xl font-semibold">{item.title}</h3>
+                      <p className="text-gray-600 mt-2">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </Slider>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600">Aucune image disponible pour le moment.</p>
+              </div>
+            )}
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className=" bg-cover bg-center text-white py-24" style={{ backgroundImage: `url(${PadelSolutions})` }}>
+        <section className="bg-cover bg-center text-white py-24" style={{ backgroundImage: `url(${PadelSolutions})` }}>
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6">
               Découvrez nos solutions adaptées à tous vos besoins particuliers ou professionnels, choisissez votre expérience padel.
@@ -112,7 +166,6 @@ const Galerie: React.FC = () => {
             </Slider>
           </div>
         </section>
-        
       </div>
     </div>
   );
