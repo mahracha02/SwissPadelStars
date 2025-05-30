@@ -1,17 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
 import PadelSolutions from "../assets/images/padelSolutions.jpg"
-import { MapPin, Phone, Mail, Send, User, MessageSquare, Instagram, Facebook, Linkedin } from 'lucide-react';
+import { MapPin, Mail, Send, User, MessageSquare, Instagram, Facebook, Linkedin, Loader2, Tag } from 'lucide-react';
+
+interface ContactObject {
+  id: number;
+  type: string;
+}
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
-    phone: '',
+    object: '',
     message: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const [objects, setObjects] = useState<ContactObject[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({
+    type: null,
+    message: '',
+  });
+
+  useEffect(() => {
+    const fetchObjects = async () => {
+      try {
+        const response = await fetch('https://127.0.0.1:8001/api/admin/objects');
+        if (!response.ok) {
+          throw new Error('Failed to fetch objects');
+        }
+        const data = await response.json() as ContactObject[];
+        setObjects(data);
+      } catch (error) {
+        console.error('Error fetching objects:', error);
+      }
+    };
+
+    fetchObjects();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -19,10 +51,57 @@ const Contact: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log(formData);
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
+
+    try {
+      console.log('Sending form data:', formData);
+      const response = await fetch('https://127.0.0.1:8001/api/admin/contacts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          object: parseInt(formData.object),
+          message: formData.message
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('Server response:', response.status, errorData);
+        throw new Error(errorData?.detail || errorData?.message || 'Failed to send message');
+      }
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      setSubmitStatus({
+        type: 'success',
+        message: 'Votre message a été envoyé avec succès! Nous vous répondrons dans les plus brefs délais.',
+      });
+
+      // Reset form
+      setFormData({
+        fullName: '',
+        email: '',
+        object: '',
+        message: '',
+      });
+    } catch (error) {
+      console.error('Error details:', error);
+      setSubmitStatus({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'envoi du message. Veuillez réessayer.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -53,10 +132,10 @@ const Contact: React.FC = () => {
 
             <div className="group bg-white rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <div className="w-16 h-16 mx-auto mb-6 bg-[#c5ff32] rounded-2xl flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-transform duration-300">
-                <Phone className="w-8 h-8 text-black -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                <Tag className="w-8 h-8 text-black -rotate-45 group-hover:rotate-0 transition-transform duration-300" />
               </div>
-              <h3 className="text-xl font-bold mb-2 text-center">Téléphone</h3>
-              <p className="text-gray-600 text-center">+41 78 XXX XX XX</p>
+              <h3 className="text-xl font-bold mb-2 text-center">Objets</h3>
+              <p className="text-gray-600 text-center">Choisissez parmi nos différents objets</p>
             </div>
           </div>
         </section>
@@ -67,20 +146,32 @@ const Contact: React.FC = () => {
             {/* Contact Form */}
             <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-xl">
               <h2 className="text-4xl font-bold mb-8">Contactez-nous</h2>
+              {submitStatus.type && (
+                <div 
+                  className={`mb-6 p-4 rounded-xl ${
+                    submitStatus.type === 'success' 
+                      ? 'bg-green-50 text-green-700 border border-green-200' 
+                      : 'bg-red-50 text-red-700 border border-red-200'
+                  }`}
+                >
+                  {submitStatus.message}
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
+                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="fullName">
                     Nom et prénom
                   </label>
                   <div className="relative">
                     <input
                       type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
                       onChange={handleChange}
                       className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#c5ff32] focus:border-transparent transition-all duration-300"
                       required
+                      disabled={isSubmitting}
                     />
                     <User className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   </div>
@@ -99,25 +190,39 @@ const Contact: React.FC = () => {
                       onChange={handleChange}
                       className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#c5ff32] focus:border-transparent transition-all duration-300"
                       required
+                      disabled={isSubmitting}
                     />
                     <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
                   </div>
                 </div>
 
                 <div className="relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="phone">
-                    Téléphone
+                  <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="object">
+                    Objet
                   </label>
                   <div className="relative">
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
+                    <select
+                      id="object"
+                      name="object"
+                      value={formData.object}
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#c5ff32] focus:border-transparent transition-all duration-300"
-                    />
-                    <Phone className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#c5ff32] focus:border-transparent transition-all duration-300 appearance-none bg-white"
+                      required
+                      disabled={isSubmitting}
+                    >
+                      <option value="">Sélectionnez un objet</option>
+                      {objects.map((obj) => (
+                        <option key={obj.id} value={obj.id}>
+                          {obj.type}
+                        </option>
+                      ))}
+                    </select>
+                    <Tag className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
@@ -134,6 +239,7 @@ const Contact: React.FC = () => {
                       rows={6}
                       className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#c5ff32] focus:border-transparent transition-all duration-300"
                       required
+                      disabled={isSubmitting}
                     ></textarea>
                     <MessageSquare className="w-5 h-5 text-gray-400 absolute left-4 top-6" />
                   </div>
@@ -141,10 +247,20 @@ const Contact: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center gap-2 font-medium group"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors duration-300 flex items-center justify-center gap-2 font-medium group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-                  Envoyer le message
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Envoi en cours...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
+                      Envoyer le message
+                    </>
+                  )}
                 </button>
               </form>
             </div>
@@ -153,14 +269,23 @@ const Contact: React.FC = () => {
             <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-xl">
               <h2 className="text-4xl font-bold mb-8">Suivez-nous sur les reseaux</h2>
               <div className="flex gap-4 mb-6">
-                <a href="https://www.instagram.com/swisspadelstars/" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://www.instagram.com/swisspadelstars/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-[#c5ff32] transition-colors"
+                >
                   <Instagram className="w-8 h-8" />
                 </a>
-                <a href="https://www.facebook.com/SwissPadelStars" target="_blank" rel="noopener noreferrer">
+                <a 
+                  href="https://www.facebook.com/SwissPadelStars" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-[#c5ff32] transition-colors"
+                >
                   <Linkedin className="w-8 h-8" />
                 </a>
               </div>
-
 
               <div className="relative w-full h-[400px] sm:h-[500px] rounded-xl overflow-hidden shadow-lg">
                 <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent pointer-events-none z-10"></div>
@@ -181,7 +306,7 @@ const Contact: React.FC = () => {
         </section>
 
         {/* CTA Section */}
-        <section className=" bg-cover bg-center text-white py-24 mt-30" style={{ backgroundImage: `url(${PadelSolutions})` }}>
+        <section className="bg-cover bg-center text-white py-24 mt-30" style={{ backgroundImage: `url(${PadelSolutions})` }}>
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold mb-6">
               Découvrez nos solutions adaptées à tous vos besoins particuliers ou professionnels, choisissez votre expérience padel.

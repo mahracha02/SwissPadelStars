@@ -30,8 +30,6 @@ class Contacts
     #[ORM\JoinColumn(nullable: false)]
     private ?objet $object = null;
 
-    #[ORM\Column]
-    private ?bool $published = null;
 
     public function getId(): ?int
     {
@@ -98,15 +96,4 @@ class Contacts
         return $this;
     }
 
-    public function isPublished(): ?bool
-    {
-        return $this->published;
-    }
-
-    public function setPublished(bool $published): static
-    {
-        $this->published = $published;
-
-        return $this;
-    }
 }

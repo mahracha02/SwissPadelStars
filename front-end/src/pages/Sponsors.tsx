@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
 import { Image, Eye, Rocket, Target, HandshakeIcon } from 'lucide-react';
 import UBS from "../assets/images/UBS.png"
@@ -7,7 +7,40 @@ import SWISSCOM from "../assets/images/SWISSCOM.png"
 import PadelSolutions from "../assets/images/padelSolutions.jpg"
 import Slider from 'react-slick';
 
+interface Sponsor {
+  id: number;
+  name: string;
+  description: string;
+  image: string;
+  site_url: string;
+  published: boolean;
+}
+
 const Sponsors: React.FC = () => {
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSponsors();
+  }, []);
+
+  const fetchSponsors = async () => {
+    try {
+      const response = await fetch('https://127.0.0.1:8001/api/admin/sponsors/published');
+      if (!response.ok) {
+        throw new Error('Failed to fetch sponsors');
+      }
+      const data = await response.json();
+      // Filter only published sponsors
+      const publishedSponsors = data.filter((sponsor: Sponsor) => sponsor.published);
+      setSponsors(publishedSponsors);
+    } catch (error) {
+      console.error('Error fetching sponsors:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const stats = [
     { number: '4', label: "Années d'expériences" },
     { number: '1,000+', label: 'Clients satisfaits' },
@@ -41,6 +74,17 @@ const Sponsors: React.FC = () => {
       description: "En collaborant avec Swiss Padel Stars, vous participez activement au développement d'une discipline qui rassemble et inspire."
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-xl">Chargement...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -79,90 +123,39 @@ const Sponsors: React.FC = () => {
 
         {/* Sponsors Section */}
         <section className="py-16 p-12">
-          {/* UBS */}
-          <div className="relative mb-16 max-w-7xl mx-auto mb-30">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-              {/* Left: Image */}
-              <div className="w-full md:w-1/2 relative z-10">
-                <img 
-                  src={UBS}
-                  alt="UBS Logo" 
-                  className="w-full h-auto"
-                />
-              </div>
- 
-              {/* Right: Feature Card with overlap */}
-              <div className="w-full md:w-1/2 bg-neutral-900 text-white p-12 md:p-16 md:-ml-24 relative z-20">
-                <h2 className="text-4xl md:text-5xl font-bold mb-12">UBS</h2>
-                <p className="text-gray-300 mb-12 text-xl">
-                  UBS collabore avec Swiss Padel Stars pour refléter son engagement envers l'innovation et le sport.
-                  Ce partenariat renforce sa visibilité auprès d'une clientèle haut de gamme lors d'événements sportifs exclusifs.
-                </p>
-                <a 
-                  href="#" 
-                  className="inline-block bg-[#c5ff32] text-black px-10 py-4 rounded-full font-medium hover:bg-opacity-90 transition-colors w-fit text-lg"
-                >
-                  VISITER LE SITE INTERNET
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* TAG HEUER */}
-          <div className="relative mb-16 max-w-7xl mx-auto mb-30">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-              {/* Left: Image */}
-              <div className="w-full md:w-1/2 relative z-10">
-                <img 
-                  src={TAG}
-                  alt="TAG Heuer Logo" 
-                  className="w-full h-auto"
-                />
-              </div>
-              {/* Right: Feature Card */}
-              <div className="w-full md:w-1/2 bg-neutral-900 text-white p-12 md:p-16 md:-ml-24 relative z-20">
-                <h2 className="text-4xl md:text-5xl font-bold mb-12">TAG HEUER</h2>
-                <p className="text-gray-300 mb-12 text-xl">
-                  TAG Heuer, symbole de précision et d'excellence, s'associe à Swiss Padel Stars pour promouvoir son 
-                  image de marque auprès d'un public actif et passionné, en s'intégrant aux événements et compétitions.
-                </p>
-                <a 
-                  href="#" 
-                  className="inline-block bg-[#c5ff32] text-black px-10 py-4 rounded-full font-medium hover:bg-opacity-90 transition-colors w-fit text-lg"
-                >
-                  VISITER LE SITE INTERNET
-                </a>
+          {sponsors.map((sponsor) => (
+            <div key={sponsor.id} className="relative mb-16 max-w-7xl mx-auto mb-30">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+                {/* Left: Image */}
+                <div className="w-full md:w-1/2 relative z-10">
+                  <img 
+                    src={`https://127.0.0.1:8001${sponsor.image}`}
+                    alt={`${sponsor.name} Logo`}
+                    className="w-full h-auto"
+                  />
+                </div>
+                {/* Right: Feature Card */}
+                <div className="w-full md:w-1/2 bg-neutral-900 text-white p-12 md:p-16 md:-ml-24 relative z-20 min-h-[400px] flex flex-col justify-between">
+                  <div>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-8">{sponsor.name}</h2>
+                    <p className="text-gray-300 text-xl line-clamp-4">
+                      {sponsor.description}
+                    </p>
+                  </div>
+                  <div className="mt-8">
+                    <a 
+                      href={sponsor.site_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-[#c5ff32] text-black px-10 py-4 rounded-full font-medium hover:bg-opacity-90 transition-colors w-fit text-lg"
+                    >
+                      VISITER LE SITE INTERNET
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* SWISSCOM */}
-          <div className="relative max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-              {/* Left: Image */}
-              <div className="w-full md:w-1/2 relative z-10">
-                <img 
-                  src={SWISSCOM}
-                  alt="Swisscom Logo" 
-                  className="w-full h-auto"
-                />
-              </div>
-              {/* Right: Feature Card */}
-              <div className="w-full md:w-1/2 bg-neutral-900 text-white p-12 md:p-16 md:-ml-24 relative z-20">
-                <h2 className="text-4xl md:text-5xl font-bold mb-12">SWISSCOM</h2>
-                <p className="text-gray-300 mb-12 text-xl">
-                  Swisscom s'engage avec Swiss Padel Stars pour soutenir le développement technologique dans le sport 
-                  et renforcer son positionnement en tant que partenaire innovant, atteignant un public moderne et connecté.
-                </p>
-                <a 
-                  href="#" 
-                  className="inline-block bg-[#c5ff32] text-black px-10 py-4 rounded-full font-medium hover:bg-opacity-90 transition-colors w-fit text-lg"
-                >
-                  VISITER LE SITE INTERNET
-                </a>
-              </div>
-            </div>
-          </div>
+          ))}
         </section>
 
         {/* Advantages Section */}
@@ -205,14 +198,14 @@ const Sponsors: React.FC = () => {
         </section>
 
         {/* CTA Section */}
-        <section className=" bg-cover bg-center text-white py-24 mt-30" style={{ backgroundImage: `url(${PadelSolutions})` }}>
+        <section className="bg-cover bg-center text-white py-24 mt-30" style={{ backgroundImage: `url(${PadelSolutions})` }}>
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-6xl sm:text-5xl font-bold mb-6">
-                Faites briller votre marque avec Swiss Padel Stars
+              Faites briller votre marque avec Swiss Padel Stars
             </h2>
             <p className="text-4xl sm:text-3xl text-withe mb-8">
-                Associez votre image à un sport en plein essor et touchez 
-                une audience passionnée et engagée.
+              Associez votre image à un sport en plein essor et touchez 
+              une audience passionnée et engagée.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-[#c5ff32] text-black px-8 py-3 rounded-full font-bold hover:bg-opacity-90 transition-colors">
