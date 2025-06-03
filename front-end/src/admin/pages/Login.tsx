@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { post } from '../../services/api';
-import { AxiosError } from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,16 +16,29 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const data = await post('/login', { email, password });
+      const response = await fetch('https://127.0.0.1:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Une erreur est survenue');
+      }
+
+      const data = await response.json();
       
-      // Use the login function from AuthContext with both token and user data
+      // Store token and user data
       login(data.token, data.user);
       
       // Redirect to admin dashboard
       navigate('/admin/dashboard');
     } catch (error) {
-      if (error instanceof AxiosError) {
-        setError(error.response?.data?.message || 'Une erreur est survenue');
+      if (error instanceof Error) {
+        setError(error.message);
       } else {
         setError('Une erreur est survenue');
       }

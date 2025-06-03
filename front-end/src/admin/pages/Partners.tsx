@@ -200,7 +200,7 @@ const Partners = () => {
 
     try {
       const url = currentPartner 
-        ? `https://127.0.0.1:8000/api/admin/partners/new/${currentPartner.id}`
+        ? `https://127.0.0.1:8000/api/admin/partners/${currentPartner.id}`
         : 'https://127.0.0.1:8000/api/admin/partners/new';
       
       const response = await fetch(url, {

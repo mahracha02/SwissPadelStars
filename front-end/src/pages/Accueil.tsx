@@ -73,7 +73,7 @@ const Accueil: React.FC = () => {
           <div className="container mx-auto flex flex-col md:flex-row items-center">
             {/* Texte  */}
             <div className="md:w-2/4 p-2 flex flex-col justify-center text-left mr-10 ">
-              <h2 className="text-5xl font-bold mb-12">Padel PingPong</h2>
+              <h2 className="text-5xl font-bold mb-12 text-[#202020]">Padel PingPong</h2>
               <p className="text-2xl text-gray-800 leading-relaxed mb-6">
                 <strong className="font-semibold">L'innovation au service du divertissement.</strong><br/> Le padel PingPong est une innovation récente qui fusionne 
                 les concepts du pingpong et du padel. Joué sur une table spécialement conçue avec des raquettes et 

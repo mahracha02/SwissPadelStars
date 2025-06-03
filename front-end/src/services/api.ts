@@ -1,6 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosError } from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://127.0.0.1:8000/api';
 
 // Define types for request data
 type RequestData = Record<string, unknown>;
