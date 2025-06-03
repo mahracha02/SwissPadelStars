@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
 import PadelSolutions from "../assets/images/padelSolutions.jpg"
-import { MapPin, Mail, Send, User, MessageSquare, Instagram, Facebook, Linkedin, Loader2, Tag } from 'lucide-react';
+import {  Mail, Send, User, MessageSquare, Instagram, Linkedin, Loader2, Tag } from 'lucide-react';
 
 interface ContactObject {
   id: number;
@@ -29,7 +29,7 @@ const Contact: React.FC = () => {
   useEffect(() => {
     const fetchObjects = async () => {
       try {
-        const response = await fetch('https://127.0.0.1:8000/api/admin/objects');
+        const response = await fetch('https://127.0.0.1:8000/api/objects');
         if (!response.ok) {
           throw new Error('Failed to fetch objects');
         }
@@ -58,7 +58,7 @@ const Contact: React.FC = () => {
 
     try {
       console.log('Sending form data:', formData);
-      const response = await fetch('https://127.0.0.1:8000/api/admin/contacts', {
+      const response = await fetch('https://127.0.0.1:8000/api/contact/new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

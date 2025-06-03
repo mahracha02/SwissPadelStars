@@ -44,7 +44,7 @@ const Sponsors = () => {
       render: (value: string) => (
         value ? (
           <img
-            src={`https://127.0.0.1:8001${value}`}
+            src={`https://127.0.0.1:8000${value}`}
             alt="Sponsor"
             className="h-16 w-16 object-contain rounded"
           />
@@ -124,7 +124,7 @@ const Sponsors = () => {
 
   const fetchSponsors = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/admin/sponsors');
+      const response = await fetch('https://127.0.0.1:8000/api/admin/sponsors');
       if (!response.ok) {
         throw new Error('Failed to fetch sponsors');
       }
@@ -139,7 +139,7 @@ const Sponsors = () => {
 
   const handleEdit = (sponsor: Sponsor) => {
     setCurrentSponsor(sponsor);
-    setPreviewImage(sponsor.image ? `https://127.0.0.1:8001${sponsor.image}` : null);
+    setPreviewImage(sponsor.image ? `https://127.0.0.1:8000${sponsor.image}` : null);
     setIsModalOpen(true);
   };
 
@@ -152,7 +152,7 @@ const Sponsors = () => {
     if (!sponsorToDelete) return;
 
     try {
-      const response = await fetch(`https://127.0.0.1:8001/api/admin/sponsors/${sponsorToDelete.id}`, {
+      const response = await fetch(`https://127.0.0.1:8000/api/admin/sponsors/${sponsorToDelete.id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -169,7 +169,7 @@ const Sponsors = () => {
 
   const handleTogglePublish = async (sponsor: Sponsor) => {
     try {
-      const response = await fetch(`https://127.0.0.1:8001/api/admin/sponsors/${sponsor.id}/toggle-publish`, {
+      const response = await fetch(`https://127.0.0.1:8000/api/admin/sponsors/${sponsor.id}/toggle-publish`, {
         method: 'PATCH',
         headers: {
           'Accept': 'application/json',
@@ -219,7 +219,7 @@ const Sponsors = () => {
 
     try {
       if (currentSponsor) {
-        const response = await fetch(`https://127.0.0.1:8001/api/admin/sponsors/${currentSponsor.id}`, {
+        const response = await fetch(`https://127.0.0.1:8000/api/admin/sponsors/${currentSponsor.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -231,7 +231,7 @@ const Sponsors = () => {
           throw new Error('Failed to update sponsor');
         }
       } else {
-        const response = await fetch('https://127.0.0.1:8001/api/admin/sponsors', {
+        const response = await fetch('https://127.0.0.1:8000/api/admin/sponsors', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -51,7 +51,7 @@ const Gallery = () => {
       render: (value: string) => (
         value ? (
           <img
-            src={`https://127.0.0.1:8001${value}`}
+            src={`https://127.0.0.1:8000${value}`}
             alt="Gallery"
             className="h-16 w-16 object-contain rounded"
           />
@@ -117,7 +117,7 @@ const Gallery = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/admin/gallery');
+      const response = await fetch('https://127.0.0.1:8000/api/admin/gallery');
       if (!response.ok) {
         throw new Error('Failed to fetch gallery items');
       }
@@ -132,7 +132,7 @@ const Gallery = () => {
 
   const handleEdit = (item: GalleryItem) => {
     setCurrentItem(item);
-    setPreviewImage(item.image ? `https://127.0.0.1:8001${item.image}` : null);
+    setPreviewImage(item.image ? `https://127.0.0.1:8000${item.image}` : null);
     setIsModalOpen(true);
   };
 
@@ -164,7 +164,7 @@ const Gallery = () => {
     if (!itemToDelete) return;
 
     try {
-      const response = await fetch(`https://127.0.0.1:8001/api/admin/gallery/${itemToDelete.id}`, {
+      const response = await fetch(`https://127.0.0.1:8000/api/admin/gallery/${itemToDelete.id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -192,7 +192,7 @@ const Gallery = () => {
 
     try {
       if (currentItem) {
-        const response = await fetch(`https://127.0.0.1:8001/api/admin/gallery/${currentItem.id}`, {
+        const response = await fetch(`https://127.0.0.1:8000/api/admin/gallery/${currentItem.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -204,7 +204,7 @@ const Gallery = () => {
           throw new Error('Failed to update gallery item');
         }
       } else {
-        const response = await fetch('https://127.0.0.1:8001/api/admin/gallery', {
+        const response = await fetch('https://127.0.0.1:8000/api/admin/gallery', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -226,7 +226,7 @@ const Gallery = () => {
 
   const handleTogglePublish = async (item: GalleryItem) => {
     try {
-      const response = await fetch(`https://127.0.0.1:8001/api/admin/gallery/${item.id}/toggle-publish`, {
+      const response = await fetch(`https://127.0.0.1:8000/api/admin/gallery/${item.id}/toggle-publish`, {
         method: 'PATCH',
         headers: {
           'Accept': 'application/json',

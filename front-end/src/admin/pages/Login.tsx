@@ -1,29 +1,38 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { post } from '../../services/api';
+import { AxiosError } from 'axios';
 
-export default function Login() {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { theme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/admin');
-    } catch (err) {
-      setError('Invalid email or password');
+      const data = await post('/login', { email, password });
+      
+      // Use the login function from AuthContext with both token and user data
+      login(data.token, data.user);
+      
+      // Redirect to admin dashboard
+      navigate('/admin/dashboard');
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        setError(error.response?.data?.message || 'Une erreur est survenue');
+      } else {
+        setError('Une erreur est survenue');
+      }
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -71,8 +80,8 @@ export default function Login() {
                 />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
-            <p className="text-white/80 mt-2">Sign in to your account</p>
+            <h2 className="text-3xl font-bold text-white">Bienvenue</h2>
+            <p className="text-white/80 mt-2">Connectez-vous à votre compte</p>
           </div>
 
           {/* Login Form */}
@@ -88,13 +97,13 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 shadow-sm focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-200 backdrop-blur-sm"
-                placeholder="Enter your email"
+                placeholder="Entrez votre email"
               />
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-white">
-                Password
+                Mot de passe
               </label>
               <input
                 id="password"
@@ -103,7 +112,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white placeholder-white/50 shadow-sm focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-200 backdrop-blur-sm"
-                placeholder="Enter your password"
+                placeholder="Entrez votre mot de passe"
               />
             </div>
 
@@ -115,19 +124,19 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full flex justify-center py-3 px-4 border border-white/20 rounded-xl shadow-sm text-sm font-medium text-white bg-white/10 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50 transform transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              {isLoading ? (
+              {loading ? (
                 <div className="flex items-center">
                   <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Signing in...
+                  Connexion en cours...
                 </div>
               ) : (
-                'Sign in'
+                'Se connecter'
               )}
             </button>
           </form>
@@ -135,4 +144,6 @@ export default function Login() {
       </div>
     </div>
   );
-} 
+};
+
+export default Login; 
