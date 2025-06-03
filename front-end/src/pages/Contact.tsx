@@ -29,7 +29,7 @@ const Contact: React.FC = () => {
   useEffect(() => {
     const fetchObjects = async () => {
       try {
-        const response = await fetch('https://127.0.0.1:8001/api/admin/objects');
+        const response = await fetch('https://127.0.0.1:8000/api/admin/objects');
         if (!response.ok) {
           throw new Error('Failed to fetch objects');
         }
@@ -58,7 +58,7 @@ const Contact: React.FC = () => {
 
     try {
       console.log('Sending form data:', formData);
-      const response = await fetch('https://127.0.0.1:8001/api/admin/contacts', {
+      const response = await fetch('https://127.0.0.1:8000/api/admin/contacts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

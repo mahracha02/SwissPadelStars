@@ -31,7 +31,7 @@ const Evenements: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch('https://127.0.0.1:8001/api/admin/events/published');
+        const response = await fetch('https://127.0.0.1:8000/api/admin/events/published');
         
         if (!response.ok) {
           if (response.status === 404) {

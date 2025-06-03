@@ -124,7 +124,7 @@ const Contacts = () => {
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/admin/contacts');
+      const response = await fetch('https://127.0.0.1:8000/api/admin/contacts');
       if (!response.ok) {
         throw new Error('Failed to fetch contacts');
       }
@@ -157,7 +157,7 @@ const Contacts = () => {
     if (!contactToDelete) return;
 
     try {
-      const response = await fetch(`https://127.0.0.1:8001/api/admin/contacts/${contactToDelete.id}`, {
+      const response = await fetch(`https://127.0.0.1:8000/api/admin/contacts/${contactToDelete.id}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
@@ -181,7 +181,7 @@ const Contacts = () => {
       };
 
       if (selectedContact) {
-        const response = await fetch(`https://127.0.0.1:8001/api/admin/contacts/${selectedContact.id}`, {
+        const response = await fetch(`https://127.0.0.1:8000/api/admin/contacts/${selectedContact.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ const Contacts = () => {
           throw new Error('Failed to update contact');
         }
       } else {
-        const response = await fetch('https://127.0.0.1:8001/api/admin/contacts', {
+        const response = await fetch('https://127.0.0.1:8000/api/admin/contacts', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -214,7 +214,7 @@ const Contacts = () => {
 
   const handleToggleStatus = async (contact: Contact) => {
     try {
-      const response = await fetch(`https://127.0.0.1:8001/api/admin/contacts/${contact.id}/toggle-status`, {
+      const response = await fetch(`https://127.0.0.1:8000/api/admin/contacts/${contact.id}/toggle-status`, {
         method: 'PATCH',
         headers: {
           'Accept': 'application/json',

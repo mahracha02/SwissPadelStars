@@ -23,7 +23,7 @@ const Galerie: React.FC = () => {
 
   const fetchGalleryItems = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/gallery');
+      const response = await fetch('https://127.0.0.1:8000/api/gallery');
       if (!response.ok) {
         throw new Error('Failed to fetch gallery items');
       }
@@ -89,7 +89,7 @@ const Galerie: React.FC = () => {
                   <div key={item.id} className="outline-none">
                     <div className="aspect-[16/9] overflow-hidden rounded-lg shadow-xl">
                       <img
-                        src={`https://127.0.0.1:8001${item.image}`}
+                        src={`https://127.0.0.1:8000${item.image}`}
                         alt={item.title}
                         className="w-full h-full object-cover"
                       />

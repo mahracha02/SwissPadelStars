@@ -28,15 +28,15 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       // Fetch events count
-      const eventsResponse = await fetch('https://127.0.0.1:8001/api/admin/events');
+      const eventsResponse = await fetch('https://127.0.0.1:8000/api/admin/events');
       const eventsData = await eventsResponse.json();
       
       // Fetch contacts count
-      const contactsResponse = await fetch('https://127.0.0.1:8001/api/admin/contacts');
+      const contactsResponse = await fetch('https://127.0.0.1:8000/api/admin/contacts');
       const contactsData = await contactsResponse.json();
 
       // Fetch gallery count
-      const galleryResponse = await fetch('https://127.0.0.1:8001/api/admin/gallery');
+      const galleryResponse = await fetch('https://127.0.0.1:8000/api/admin/gallery');
       const galleryData = await galleryResponse.json();
 
       setStats({

@@ -26,7 +26,7 @@ const Sponsors: React.FC = () => {
 
   const fetchSponsors = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/admin/sponsors/published');
+      const response = await fetch('https://127.0.0.1:8000/api/admin/sponsors/published');
       if (!response.ok) {
         throw new Error('Failed to fetch sponsors');
       }
