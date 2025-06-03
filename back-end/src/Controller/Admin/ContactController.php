@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Contacts;
-use App\Entity\Objet;
 use App\Repository\ContactsRepository;
 use App\Repository\ObjetRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,33 +44,6 @@ class ContactController extends AbstractController
         }, $contacts);
         $response = $this->serializer->serialize($data, 'json', ['groups' => 'contact:read']);
         return new JsonResponse($response, Response::HTTP_OK, [], true);
-    }
-
-
-    #[Route('/contacts', name: 'admin_contacts_create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-
-        $contact = new Contacts();
-        $contact->setFullName($data['fullName']);
-        $contact->setEmail($data['email']);
-        $contact->setMessage($data['message']);
-        $contact->setStatus(null); // Default status is null
-
-        // Set the object if provided
-        if (isset($data['object'])) {
-            $object = $this->objetRepository->find($data['object']);
-            if ($object) {
-                $contact->setObject($object);
-            }
-        }
-
-        $this->entityManager->persist($contact);
-        $this->entityManager->flush();
-
-        $response = $this->serializer->serialize($contact, 'json', ['groups' => 'contact:read']);
-        return new JsonResponse($response, Response::HTTP_CREATED, [], true);
     }
 
     #[Route('/contacts/{id}', name: 'admin_contacts_update', methods: ['PUT'])]
@@ -124,16 +96,6 @@ class ContactController extends AbstractController
     public function toggleStatus(Contacts $contact): JsonResponse
     {
         $contact->setStatus(!$contact->isStatus());
-        $this->entityManager->flush();
-
-        $response = $this->serializer->serialize($contact, 'json', ['groups' => 'contact:read']);
-        return new JsonResponse($response, Response::HTTP_OK, [], true);
-    }
-
-    #[Route('/contacts/{id}/toggle-publish', name: 'admin_contacts_toggle_publish', methods: ['PATCH'])]
-    public function togglePublish(Contacts $contact): JsonResponse
-    {
-        $contact->setPublished(!$contact->isPublished());
         $this->entityManager->flush();
 
         $response = $this->serializer->serialize($contact, 'json', ['groups' => 'contact:read']);
