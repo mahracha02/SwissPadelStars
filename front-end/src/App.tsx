@@ -1,11 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './admin/pages/Login';
+import Dashboard from './admin/pages/Dashboard';
+import Users from './admin/pages/Users';
 import Accueil from './pages/Accueil';
 import Evenements from './pages/Evenements';
 import Sponsors from './pages/Sponsors';
 import Galerie from './pages/Galerie';
 import Contact from './pages/Contact';
-import Services from './pages/Services';
 import Particulier from './pages/Particulier';
 import Professionnel from './pages/Professionnel';
 import Footer from './layout/Footer';
@@ -25,15 +29,6 @@ import AdminFeedback from './admin/pages/Feedback';
 import AdminProfessionalServices from './admin/pages/ProfessionalServices';
 import AdminParticularServices from './admin/pages/ParticularServices';
 import AdminUsers from './admin/pages/Users';
-
-// Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  if (!user) {
-    return <Navigate to="/admin/login" replace />;
-  }
-  return <AdminLayout>{children}</AdminLayout>;
-};
 
 // Layout Component for Public Routes
 const PublicLayout = ({ children }: { children: React.ReactNode }) => {
@@ -64,7 +59,6 @@ const App = () => {
                       <Route path="sponsors" element={<Sponsors />} />
                       <Route path="galerie" element={<Galerie />} />
                       <Route path="contact" element={<Contact />} />
-                      <Route path="services" element={<Services />} />
                       <Route path="particulier" element={<Particulier />} />
                       <Route path="professionnel" element={<Professionnel />} />
                     </Routes>

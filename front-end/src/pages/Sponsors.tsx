@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
 import { Image, Eye, Rocket, Target, HandshakeIcon } from 'lucide-react';
-import UBS from "../assets/images/UBS.png"
-import TAG from "../assets/images/TAG.png"
-import SWISSCOM from "../assets/images/SWISSCOM.png"
 import PadelSolutions from "../assets/images/padelSolutions.jpg"
 import Slider from 'react-slick';
+import PartnersSection from '../layout/PartnersSection';
 
 interface Sponsor {
   id: number;
   name: string;
   description: string;
   image: string;
-  site_url: string;
+  siteUrl: string;
   published: boolean;
 }
 
@@ -26,14 +24,12 @@ const Sponsors: React.FC = () => {
 
   const fetchSponsors = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/admin/sponsors/published');
+      const response = await fetch('https://127.0.0.1:8000/api/sponsors');
       if (!response.ok) {
         throw new Error('Failed to fetch sponsors');
       }
       const data = await response.json();
-      // Filter only published sponsors
-      const publishedSponsors = data.filter((sponsor: Sponsor) => sponsor.published);
-      setSponsors(publishedSponsors);
+      setSponsors(data);
     } catch (error) {
       console.error('Error fetching sponsors:', error);
     } finally {
@@ -129,7 +125,7 @@ const Sponsors: React.FC = () => {
                 {/* Left: Image */}
                 <div className="w-full md:w-1/2 relative z-10">
                   <img 
-                    src={`https://127.0.0.1:8001${sponsor.image}`}
+                    src={`https://127.0.0.1:8000${sponsor.image}`}
                     alt={`${sponsor.name} Logo`}
                     className="w-full h-auto"
                   />
@@ -144,7 +140,7 @@ const Sponsors: React.FC = () => {
                   </div>
                   <div className="mt-8">
                     <a 
-                      href={sponsor.site_url}
+                      href={sponsor.siteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block bg-[#c5ff32] text-black px-10 py-4 rounded-full font-medium hover:bg-opacity-90 transition-colors w-fit text-lg"
@@ -219,43 +215,7 @@ const Sponsors: React.FC = () => {
         </section>
 
         {/* Partners Section */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-6">
-            <h2 className="text-center text-3xl font-bold mb-10 text-blue-900">Nos Partenaires</h2>
-
-            <Slider
-              autoplay
-              autoplaySpeed={2000}
-              infinite
-              slidesToShow={4}
-              slidesToScroll={1}
-              arrows={false}
-              responsive={[
-                {
-                  breakpoint: 1024,
-                  settings: { slidesToShow: 3 },
-                },
-                {
-                  breakpoint: 768,
-                  settings: { slidesToShow: 2 },
-                },
-                {
-                  breakpoint: 480,
-                  settings: { slidesToShow: 1 },
-                },
-              ]}
-            >
-              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <div key={i} className="px-4">
-                  <div className="w-full h-24 border border-gray-200 rounded flex items-center justify-center shadow hover:shadow-md transition">
-                    <Image size={32} className="text-blue-500" />
-                    <span className="ml-2 text-lg font-bold text-gray-800">Partenaire {i}</span>
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </section>
+        <PartnersSection  />
       </div>
     </div>
   );

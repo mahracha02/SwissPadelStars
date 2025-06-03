@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
 import { motion } from 'framer-motion';
 
 interface DashboardStats {
@@ -8,16 +7,21 @@ interface DashboardStats {
   galleryCount: number;
   servicesCount: number;
   usersCount: number;
+  professionalServicesCount: number;
+  sponsorsCount: number;
+  partnersCount: number;
 }
 
 const Dashboard = () => {
-  const { theme } = useTheme();
   const [stats, setStats] = useState<DashboardStats>({
     eventsCount: 0,
     contactsCount: 0,
     galleryCount: 0,
     servicesCount: 0,
-    usersCount: 0
+    usersCount: 0,
+    professionalServicesCount: 0,
+    sponsorsCount: 0,
+    partnersCount: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -28,23 +32,38 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       // Fetch events count
-      const eventsResponse = await fetch('https://127.0.0.1:8001/api/admin/events');
+      const eventsResponse = await fetch('https://127.0.0.1:8000/api/admin/events');
       const eventsData = await eventsResponse.json();
       
       // Fetch contacts count
-      const contactsResponse = await fetch('https://127.0.0.1:8001/api/admin/contacts');
+      const contactsResponse = await fetch('https://127.0.0.1:8000/api/admin/contacts');
       const contactsData = await contactsResponse.json();
 
       // Fetch gallery count
-      const galleryResponse = await fetch('https://127.0.0.1:8001/api/admin/gallery');
+      const galleryResponse = await fetch('https://127.0.0.1:8000/api/admin/gallery');
       const galleryData = await galleryResponse.json();
+
+      // Fetch professional services count
+      const professionalServicesResponse = await fetch('https://127.0.0.1:8000/api/admin/professional-services');
+      const professionalServicesData = await professionalServicesResponse.json();
+
+      // Fetch sponsors count
+      const sponsorsResponse = await fetch('https://127.0.0.1:8000/api/admin/sponsors');
+      const sponsorsData = await sponsorsResponse.json();
+
+      // Fetch partners count
+      const partnersResponse = await fetch('https://127.0.0.1:8000/api/admin/partners');
+      const partnersData = await partnersResponse.json();
 
       setStats({
         eventsCount: eventsData.length || 0,
         contactsCount: contactsData.length || 0,
         galleryCount: galleryData.length || 0,
         servicesCount: 0, // To be implemented when services API is available
-        usersCount: 0 // To be implemented when users API is available
+        usersCount: 0, // To be implemented when users API is available
+        professionalServicesCount: professionalServicesData.length || 0,
+        sponsorsCount: sponsorsData.length || 0,
+        partnersCount: partnersData.length || 0
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -184,6 +203,48 @@ const Dashboard = () => {
             className="text-3xl font-bold text-dark-500 dark:text-brand-blanc"
           >
             {stats.servicesCount}
+          </motion.p>
+        </motion.div>
+
+        <motion.div 
+          variants={cardVariants}
+          whileHover="hover"
+          className="bg-brand-blanc dark:bg-dark-500 rounded-lg shadow-lg p-6 transition-all duration-300"
+        >
+          <h3 className="text-primary-600 dark:text-primary-300 text-sm font-medium">Professional Services</h3>
+          <motion.p 
+            variants={numberVariants}
+            className="text-3xl font-bold text-dark-500 dark:text-brand-blanc"
+          >
+            {stats.professionalServicesCount}
+          </motion.p>
+        </motion.div>
+
+        <motion.div 
+          variants={cardVariants}
+          whileHover="hover"
+          className="bg-brand-blanc dark:bg-dark-500 rounded-lg shadow-lg p-6 transition-all duration-300"
+        >
+          <h3 className="text-primary-600 dark:text-primary-300 text-sm font-medium">Total Sponsors</h3>
+          <motion.p 
+            variants={numberVariants}
+            className="text-3xl font-bold text-dark-500 dark:text-brand-blanc"
+          >
+            {stats.sponsorsCount}
+          </motion.p>
+        </motion.div>
+
+        <motion.div 
+          variants={cardVariants}
+          whileHover="hover"
+          className="bg-brand-blanc dark:bg-dark-500 rounded-lg shadow-lg p-6 transition-all duration-300"
+        >
+          <h3 className="text-primary-600 dark:text-primary-300 text-sm font-medium">Total Partners</h3>
+          <motion.p 
+            variants={numberVariants}
+            className="text-3xl font-bold text-dark-500 dark:text-brand-blanc"
+          >
+            {stats.partnersCount}
           </motion.p>
         </motion.div>
         

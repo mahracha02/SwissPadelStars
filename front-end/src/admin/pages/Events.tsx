@@ -80,7 +80,7 @@ const Events = () => {
       image: event.image,
       published: event.published,
     });
-    setImagePreview(event.image ? `https://127.0.0.1:8001${event.image}` : null);
+    setImagePreview(event.image ? `https://127.0.0.1:8000${event.image}` : null);
     setShowModal(true);
   };
 
@@ -150,7 +150,7 @@ const Events = () => {
       render: (value: string) => (
         value ? (
           <img 
-            src={`https://127.0.0.1:8001${value}`} 
+            src={`https://127.0.0.1:8000${value}`} 
             alt="Event" 
             className="w-16 h-16 object-cover rounded-lg"
           />

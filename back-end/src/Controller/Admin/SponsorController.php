@@ -52,28 +52,6 @@ class SponsorController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/sponsors/published', name: 'admin_sponsors_published', methods: ['GET'])]
-    public function publishedSponsors(): JsonResponse
-    {
-        $sponsors = $this->sponsorsRepository->findBy(['published' => true]);
-        if (!$sponsors) {
-            return new JsonResponse(['message' => 'No published sponsors found'], Response::HTTP_NOT_FOUND);
-        }
-        // Map entities to array
-        $data = array_map(function ($sponsor) {
-            return [
-                'id' => $sponsor->getId(),
-                'name' => $sponsor->getName(),
-                'description' => $sponsor->getDescription(),
-                'image' => $sponsor->getImage(),
-                'siteUrl' => $sponsor->getSiteUrl(),
-                'published' => $sponsor->isPublished(),
-            ];
-        }, $sponsors);
-        $response = $this->serializer->serialize($data, 'json', ['groups' => 'sponsor:read']);
-        return new JsonResponse($response, Response::HTTP_OK, [], true);
-    }
-
     private function handleImageUpload($imageData): ?string
     {
         if (!$imageData) {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Rocket, Image, ShieldCheck } from 'lucide-react';
-import Slider from "react-slick";
 import Image1 from '../assets/images/padel1.png';
 import PadelTennis from '../assets/images/padelTennis.png';
 import PadelPingPong from '../assets/images/padelPingPong.png';
 import CEO from '../assets/images/CEO.png';
 import PadelSolutions from '../assets/images/padelSolutions.jpg';
+import PartnersSection from '../layout/PartnersSection'; 
 
 const Accueil: React.FC = () => {
   return (
@@ -172,43 +172,8 @@ const Accueil: React.FC = () => {
         </section>
 
         {/* Partners Section */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-6">
-            <h2 className="text-center text-3xl font-bold mb-10 text-blue-900">Nos Partenaires</h2>
+        <PartnersSection  />
 
-            <Slider
-              autoplay
-              autoplaySpeed={2000}
-              infinite
-              slidesToShow={4}
-              slidesToScroll={1}
-              arrows={false}
-              responsive={[
-                {
-                  breakpoint: 1024,
-                  settings: { slidesToShow: 3 },
-                },
-                {
-                  breakpoint: 768,
-                  settings: { slidesToShow: 2 },
-                },
-                {
-                  breakpoint: 480,
-                  settings: { slidesToShow: 1 },
-                },
-              ]}
-            >
-              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <div key={i} className="px-4">
-                  <div className="w-full h-24 border border-gray-200 rounded flex items-center justify-center shadow hover:shadow-md transition">
-                    <Image size={32} className="text-blue-500" />
-                    <span className="ml-2 text-lg font-bold text-gray-800">Partenaire {i}</span>
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </section>
       </main>
 
      

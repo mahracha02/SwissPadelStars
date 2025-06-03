@@ -85,31 +85,6 @@ class EventController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/events/published', name: 'admin_events_published', methods: ['GET'])]
-    public function publishedEvents(): JsonResponse
-    {
-        $events = $this->eventsRepository->findBy(['published' => true]);
-        if (!$events) {
-            return new JsonResponse(['message' => 'No published events found'], Response::HTTP_NOT_FOUND);
-        }
-
-        // Map entities to array
-        $data = array_map(function ($event) {
-            return [
-                'id' => $event->getId(),
-                'title' => $event->getTitle(),
-                'date' => $event->getDate()->format('Y-m-d H:i:s'),
-                'description' => $event->getDescription(),
-                'place' => $event->getPlace(),
-                'image' => $event->getImage(),
-                'published' => $event->isPublished(),
-            ];
-        }, $events);
-
-        $response = $this->serializer->serialize($data, 'json', ['groups' => 'event:read']);
-        return new JsonResponse($response, Response::HTTP_OK, [], true);
-    }
-
     #[Route('/events', name: 'admin_events_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {

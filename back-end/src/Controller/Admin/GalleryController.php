@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-#[Route('/api')]
+#[Route('/api/admin')]
 class GalleryController extends AbstractController
 {
     private string $uploadDir;
@@ -63,27 +63,7 @@ class GalleryController extends AbstractController
         return '/uploads/gallery/' . $newFilename;
     }
 
-    #[Route('/gallery', name: 'admin_gallery_publish', methods: ['GET'])]
-    public function index(): JsonResponse
-    {
-        $galleryItems = $this->galleryRepository->findBy(['published' => true]);
-
-        // map entities to array
-        $data = array_map(function ($item) {
-            return [
-                'id' => $item->getId(),
-                'title' => $item->getTitle(),
-                'description' => $item->getDescription(),
-                'image' => $item->getImage(),
-                'published' => $item->isPublished(),
-            ];
-        }, $galleryItems);
-
-        $response = $this->serializer->serialize($data, 'json', ['groups' => 'gallery:read']);
-        return new JsonResponse($response, Response::HTTP_OK, [], true);
-    }
-
-    #[Route('/admin/gallery', name: 'admin_gallery_list', methods: ['GET'])]
+    #[Route('/gallery', name: 'admin_gallery_list', methods: ['GET'])]
     public function allGallery(): JsonResponse
     {
         $galleryItems = $this->galleryRepository->findAll();
@@ -103,7 +83,7 @@ class GalleryController extends AbstractController
         return new JsonResponse($response, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/admin/gallery', name: 'admin_gallery_create', methods: ['POST'])]
+    #[Route('/gallery', name: 'admin_gallery_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
         try {
@@ -131,7 +111,7 @@ class GalleryController extends AbstractController
         }
     }
 
-    #[Route('/admin/gallery/{id}', name: 'admin_gallery_update', methods: ['PUT'])]
+    #[Route('/gallery/{id}', name: 'admin_gallery_update', methods: ['PUT'])]
     public function update(Request $request, Gallery $galleryItem): JsonResponse
     {
         try {
@@ -165,7 +145,7 @@ class GalleryController extends AbstractController
         }
     }
 
-    #[Route('/admin/gallery/{id}', name: 'admin_gallery_delete', methods: ['DELETE'])]
+    #[Route('/gallery/{id}', name: 'admin_gallery_delete', methods: ['DELETE'])]
     public function delete(Gallery $galleryItem): JsonResponse
     {
         try {
@@ -186,7 +166,7 @@ class GalleryController extends AbstractController
         }
     }
 
-    #[Route('/admin/gallery/{id}/toggle-publish', name: 'admin_gallery_toggle_publish', methods: ['PATCH'])]
+    #[Route('/gallery/{id}/toggle-publish', name: 'admin_gallery_toggle_publish', methods: ['PATCH'])]
     public function togglePublish(Gallery $galleryItem): JsonResponse
     {
         $galleryItem->setPublished(!$galleryItem->isPublished());

@@ -27,8 +27,20 @@ class UserController extends AbstractController
     public function index(): JsonResponse
     {
         $users = $this->userRepository->findAll();
-        $data = $this->serializer->serialize($users, 'json', ['groups' => 'user:read']);
-        return new JsonResponse($data, Response::HTTP_OK, [], true);
+
+        // Map entities to array
+        $data = array_map(function (User $user) {
+            return [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'first_name' => $user->getFirstName(),
+                'last_name' => $user->getLastName(),
+                'phone' => $user->getPhone(),
+                'roles' => $user->getRoles(),
+            ];
+        }, $users);
+        $response = $this->serializer->serialize($data, 'json', ['groups' => 'user:read']);
+        return new JsonResponse($response, Response::HTTP_OK, [], true);
     }
 
     #[Route('/users', name: 'admin_users_create', methods: ['POST'])]
@@ -38,8 +50,8 @@ class UserController extends AbstractController
 
         $user = new User();
         $user->setEmail($data['email']);
-        $user->setFirstName($data['firstName']);
-        $user->setLastName($data['lastName']);
+        $user->setFirstName($data['first_name']);
+        $user->setLastName($data['last_name']);
         $user->setPhone($data['phone']);
         $user->setRoles($data['roles'] ?? ['ROLE_USER']);
 
@@ -63,8 +75,8 @@ class UserController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $user->setEmail($data['email']);
-        $user->setFirstName($data['firstName']);
-        $user->setLastName($data['lastName']);
+        $user->setFirstName($data['first_name']);
+        $user->setLastName($data['last_name']);
         $user->setPhone($data['phone']);
         if (isset($data['roles'])) {
             $user->setRoles($data['roles']);

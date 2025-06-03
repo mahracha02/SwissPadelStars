@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -39,6 +40,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     private ?string $phone = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $token = null;
 
     public function getId(): ?int
     {
@@ -148,4 +152,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(?string $token): static
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
 }

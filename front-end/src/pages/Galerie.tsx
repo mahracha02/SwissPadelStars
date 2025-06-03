@@ -3,13 +3,13 @@ import Header from '../layout/Header';
 import { Image } from 'lucide-react';
 import Slider from 'react-slick';
 import PadelSolutions from "../assets/images/padelSolutions.jpg";
+import PartnersSection from '../layout/PartnersSection';
 
 interface GalleryItem {
   id: number;
   title: string;
   image: string;
   description: string;
-  published: boolean;
 }
 
 const Galerie: React.FC = () => {
@@ -23,14 +23,12 @@ const Galerie: React.FC = () => {
 
   const fetchGalleryItems = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8001/api/gallery');
+      const response = await fetch('https://127.0.0.1:8000/api/gallery');
       if (!response.ok) {
         throw new Error('Failed to fetch gallery items');
       }
       const data = await response.json();
-      // Filter only published items
-      const publishedItems = data.filter((item: GalleryItem) => item.published);
-      setGalleryItems(publishedItems);
+      setGalleryItems(data);
     } catch (error) {
       console.error('Error fetching gallery items:', error);
     } finally {
@@ -89,7 +87,7 @@ const Galerie: React.FC = () => {
                   <div key={item.id} className="outline-none">
                     <div className="aspect-[16/9] overflow-hidden rounded-lg shadow-xl">
                       <img
-                        src={`https://127.0.0.1:8001${item.image}`}
+                        src={`https://127.0.0.1:8000${item.image}`}
                         alt={item.title}
                         className="w-full h-full object-cover"
                       />
@@ -129,43 +127,7 @@ const Galerie: React.FC = () => {
         </section>
 
         {/* Partners Section */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-6">
-            <h2 className="text-center text-3xl font-bold mb-10 text-blue-900">Nos Partenaires</h2>
-
-            <Slider
-              autoplay
-              autoplaySpeed={2000}
-              infinite
-              slidesToShow={4}
-              slidesToScroll={1}
-              arrows={false}
-              responsive={[
-                {
-                  breakpoint: 1024,
-                  settings: { slidesToShow: 3 },
-                },
-                {
-                  breakpoint: 768,
-                  settings: { slidesToShow: 2 },
-                },
-                {
-                  breakpoint: 480,
-                  settings: { slidesToShow: 1 },
-                },
-              ]}
-            >
-              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <div key={i} className="px-4">
-                  <div className="w-full h-24 border border-gray-200 rounded flex items-center justify-center shadow hover:shadow-md transition">
-                    <Image size={32} className="text-blue-500" />
-                    <span className="ml-2 text-lg font-bold text-gray-800">Partenaire {i}</span>
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </section>
+        <PartnersSection  />
       </div>
     </div>
   );
