@@ -3,6 +3,7 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import { Plus, Eye, Pencil, Trash2, Upload, X } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface ProfessionalService {
   id: number;
@@ -21,6 +22,13 @@ export default function ProfessionalServices() {
   const [serviceToDelete, setServiceToDelete] = useState<ProfessionalService | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { user: connectedUser } = useAuth();
+
+  const isAdmin = connectedUser?.roles?.some(role => {
+    const cleanRole = role.replace('ROLE_', '');
+    return cleanRole === 'SUPER_ADMIN' || cleanRole === 'ADMIN' || role === 'ROLE_SUPER_ADMIN' || role === 'ROLE_ADMIN';
+  });
 
   const columns = [
     { 
@@ -73,7 +81,7 @@ export default function ProfessionalServices() {
         </span>
       ),
     },
-    {
+    ...(isAdmin ? [{
       key: 'actions' as keyof ProfessionalService,
       label: 'Actions',
       render: (_: unknown, item?: ProfessionalService) => {
@@ -108,7 +116,7 @@ export default function ProfessionalServices() {
           </div>
         );
       },
-    },
+    }] : []),
   ];
 
   useEffect(() => {
@@ -252,13 +260,15 @@ export default function ProfessionalServices() {
         <h1 className="text-2xl font-semibold text-dark-500 dark:text-brand-blanc">
           Services Professionnels
         </h1>
-        <button
-          onClick={handleCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
-        >
+        {isAdmin && (
+          <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
+          >
           <Plus className="w-5 h-5" />
-          Ajouter un service
-        </button>
+            Ajouter un service
+          </button>
+        )}
       </div>
 
       <DataTable

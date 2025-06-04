@@ -7,7 +7,10 @@ const ProfileBanner = () => {
   const getRoleBadge = () => {
     const role = user?.roles?.[0];
     
-    if (role === 'ROLE_SUPER_ADMIN') {
+    // Remove ROLE_ prefix if it exists
+    const cleanRole = role?.replace('ROLE_', '') || '';
+    
+    if (cleanRole === 'SUPER_ADMIN' || role === 'ROLE_SUPER_ADMIN') {
       return (
         <div className="flex items-center gap-2 bg-gradient-to-r from-[#c5ff32] to-[#a3d429] px-3 py-1.5 rounded-full shadow-lg">
           <Crown className="w-4 h-4 text-black" />
@@ -17,7 +20,7 @@ const ProfileBanner = () => {
       );
     }
     
-    if (role === 'ROLE_ADMIN') {
+    if (cleanRole === 'ADMIN' || role === 'ROLE_ADMIN') {
       return (
         <div className="flex items-center gap-2 bg-gradient-to-r from-[#c5ff32]/80 to-[#a3d429]/80 px-3 py-1.5 rounded-full shadow-md">
           <Shield className="w-4 h-4 text-black" />

@@ -1,4 +1,4 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -22,32 +22,37 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import ProfileBanner from './ProfileBanner';
 
-const navigation = [
-  { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { name: 'Events', href: '/admin/events', icon: Calendar },
-  { name: 'Gallery', href: '/admin/gallery', icon: Image },
-  { name: 'Contacts', href: '/admin/contacts', icon: MessageSquare },
-  { name: 'Sponsors', href: '/admin/sponsors', icon: Handshake },
-  { name: 'Partners', href: '/admin/partners', icon: Handshake },
-  { name: 'Professional Services', href: '/admin/professional-services', icon: Briefcase },
-  { name: 'Particular Services', href: '/admin/particular-services', icon: Building2 },
-  { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
-];
-
-interface LayoutProps {
-  children: ReactNode;
-}
-
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children }: { children: ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
+  const isSuperAdmin = user?.roles?.some(role => 
+    role === 'ROLE_SUPER_ADMIN' || role === 'SUPER_ADMIN'
+  );
+
+  const navigation = [
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Events', href: '/admin/events', icon: Calendar },
+    { name: 'Gallery', href: '/admin/gallery', icon: Image },
+    { name: 'Contacts', href: '/admin/contacts', icon: MessageSquare },
+    { name: 'Sponsors', href: '/admin/sponsors', icon: Handshake },
+    { name: 'Partners', href: '/admin/partners', icon: Handshake },
+    { name: 'Professional Services', href: '/admin/professional-services', icon: Briefcase },
+    { name: 'Particular Services', href: '/admin/particular-services', icon: Building2 },
+    ...(isSuperAdmin ? [{ name: 'Users', href: '/admin/users', icon: Users }] : []),
+    { name: 'Settings', href: '/admin/settings', icon: Settings },
+  ];
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/admin/login');
+    }
+  }, [user, navigate]);
+
   if (!user) {
-    navigate('/admin/login');
     return null;
   }
 

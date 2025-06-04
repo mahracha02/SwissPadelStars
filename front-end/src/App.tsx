@@ -81,7 +81,11 @@ const App = () => {
                         <Route path="feedback" element={<AdminFeedback />} />
                         <Route path="professional-services" element={<AdminProfessionalServices />} />
                         <Route path="particular-services" element={<AdminParticularServices />} />
-                        <Route path="users" element={<AdminUsers />} />
+                        <Route path="users" element={
+                          <ProtectedRoute requiredRoles={['ROLE_SUPER_ADMIN']}>
+                            <AdminUsers />
+                          </ProtectedRoute>
+                        } />
                       </Routes>
                     </AdminLayout>
                   </ProtectedRoute>

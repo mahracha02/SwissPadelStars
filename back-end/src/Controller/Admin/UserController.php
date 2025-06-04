@@ -72,29 +72,55 @@ class UserController extends AbstractController
     #[Route('/users/{id}', name: 'admin_users_update', methods: ['PUT'])]
     public function update(Request $request, User $user): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        try {
+            $data = json_decode($request->getContent(), true);
 
-        $user->setEmail($data['email']);
-        $user->setFirstName($data['first_name']);
-        $user->setLastName($data['last_name']);
-        $user->setPhone($data['phone']);
-        if (isset($data['roles'])) {
-            $user->setRoles($data['roles']);
-        }
+            // Check if email is being changed and if it already exists
+            if (isset($data['email']) && $data['email'] !== $user->getEmail()) {
+                $existingUser = $this->userRepository->findOneBy(['email' => $data['email']]);
+                if ($existingUser && $existingUser->getId() !== $user->getId()) {
+                    return new JsonResponse(
+                        ['error' => 'Cette adresse email est déjà utilisée par un autre utilisateur.'],
+                        Response::HTTP_BAD_REQUEST
+                    );
+                }
+            }
 
-        // Update password if provided
-        if (isset($data['password'])) {
-            $hashedPassword = $this->passwordHasher->hashPassword(
-                $user,
-                $data['password']
+            if (isset($data['email'])) {
+                $user->setEmail($data['email']);
+            }
+            if (isset($data['first_name'])) {
+                $user->setFirstName($data['first_name']);
+            }
+            if (isset($data['last_name'])) {
+                $user->setLastName($data['last_name']);
+            }
+            if (isset($data['phone'])) {
+                $user->setPhone($data['phone']);
+            }
+            if (isset($data['roles'])) {
+                $user->setRoles($data['roles']);
+            }
+
+            // Update password if provided
+            if (isset($data['password'])) {
+                $hashedPassword = $this->passwordHasher->hashPassword(
+                    $user,
+                    $data['password']
+                );
+                $user->setPassword($hashedPassword);
+            }
+
+            $this->entityManager->flush();
+
+            $response = $this->serializer->serialize($user, 'json', ['groups' => 'user:read']);
+            return new JsonResponse($response, Response::HTTP_OK, [], true);
+        } catch (\Exception $e) {
+            return new JsonResponse(
+                ['error' => 'Une erreur est survenue lors de la mise à jour de l\'utilisateur.'],
+                Response::HTTP_INTERNAL_SERVER_ERROR
             );
-            $user->setPassword($hashedPassword);
         }
-
-        $this->entityManager->flush();
-
-        $response = $this->serializer->serialize($user, 'json', ['groups' => 'user:read']);
-        return new JsonResponse($response, Response::HTTP_OK, [], true);
     }
 
     #[Route('/users/{id}', name: 'admin_users_delete', methods: ['DELETE'])]

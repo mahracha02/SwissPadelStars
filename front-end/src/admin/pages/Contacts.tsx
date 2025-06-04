@@ -3,7 +3,8 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Plus, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Contact {
   id: number;
@@ -27,6 +28,7 @@ interface Column {
 }
 
 const Contacts = () => {
+  const { user: connectedUser } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -40,6 +42,12 @@ const Contacts = () => {
     status: null,
   });
   const { theme } = useTheme();
+
+  // Check if user has admin privileges 
+  const isAdmin = connectedUser?.roles?.some(role => {
+    const cleanRole = role.replace('ROLE_', '');
+    return cleanRole === 'SUPER_ADMIN' || cleanRole === 'ADMIN' || role === 'ROLE_SUPER_ADMIN' || role === 'ROLE_ADMIN';
+  });
 
   const columns: Column[] = [
     { key: 'fullName', label: 'Nom' },
@@ -80,10 +88,10 @@ const Contacts = () => {
         );
       }
     },
-    {
-      key: 'actions',
+    ...(isAdmin ? [{
+      key: 'actions' as keyof Contact,
       label: 'Actions',
-      render: (value: any, item?: Contact) => {
+      render: (_: unknown, item?: Contact) => {
         if (!item) return null;
         return (
           <div className="flex items-center gap-2">
@@ -115,7 +123,7 @@ const Contacts = () => {
           </div>
         );
       },
-    },
+    }] : []),
   ];
 
   useEffect(() => {
@@ -242,7 +250,7 @@ const Contacts = () => {
           Contacts
         </h1>
       </div>
-
+    
       <DataTable
         data={contacts}
         columns={columns}
