@@ -2,9 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './admin/pages/Login';
-import Dashboard from './admin/pages/Dashboard';
-import Users from './admin/pages/Users';
 import Accueil from './pages/Accueil';
 import Evenements from './pages/Evenements';
 import Sponsors from './pages/Sponsors';
@@ -72,19 +69,25 @@ const App = () => {
                 path="/admin/*"
                 element={
                   <ProtectedRoute>
-                    <Routes>
-                      <Route path="/" element={<Navigate to="dashboard" replace />} />
-                      <Route path="dashboard" element={<AdminDashboard />} />
-                      <Route path="events" element={<AdminEvents />} />
-                      <Route path="gallery" element={<AdminGallery />} />
-                      <Route path="contacts" element={<AdminContacts />} />
-                      <Route path="sponsors" element={<AdminSponsors />} />
-                      <Route path="partners" element={<AdminPartners />} />
-                      <Route path="feedback" element={<AdminFeedback />} />
-                      <Route path="professional-services" element={<AdminProfessionalServices />} />
-                      <Route path="particular-services" element={<AdminParticularServices />} />
-                      <Route path="users" element={<AdminUsers />} />
-                    </Routes>
+                    <AdminLayout>
+                      <Routes>
+                        <Route path="/" element={<Navigate to="dashboard" replace />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="events" element={<AdminEvents />} />
+                        <Route path="gallery" element={<AdminGallery />} />
+                        <Route path="contacts" element={<AdminContacts />} />
+                        <Route path="sponsors" element={<AdminSponsors />} />
+                        <Route path="partners" element={<AdminPartners />} />
+                        <Route path="feedback" element={<AdminFeedback />} />
+                        <Route path="professional-services" element={<AdminProfessionalServices />} />
+                        <Route path="particular-services" element={<AdminParticularServices />} />
+                        <Route path="users" element={
+                          <ProtectedRoute requiredRoles={['ROLE_SUPER_ADMIN']}>
+                            <AdminUsers />
+                          </ProtectedRoute>
+                        } />
+                      </Routes>
+                    </AdminLayout>
                   </ProtectedRoute>
                 }
               />

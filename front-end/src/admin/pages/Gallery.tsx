@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import { useTheme } from '../../contexts/ThemeContext';
 import { Plus, Eye, Pencil, Trash2, Upload, X } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface GalleryItem {
   id: number;
@@ -13,70 +13,74 @@ interface GalleryItem {
   published: boolean;
 }
 
-type GalleryFormData = Omit<GalleryItem, 'id'>;
-
 interface Column {
   key: keyof GalleryItem | 'actions';
   label: string;
-  render?: (value: any, item?: GalleryItem) => React.ReactNode;
+  render?: (value: unknown, item?: GalleryItem) => React.ReactNode;
 }
 
 const Gallery = () => {
+  const { user: connectedUser } = useAuth();
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState<GalleryItem | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<GalleryItem | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { theme } = useTheme();
+
+  // Check if user has admin privileges 
+  const isAdmin = connectedUser?.roles?.some(role => {
+    const cleanRole = role.replace('ROLE_', '');
+    return cleanRole === 'SUPER_ADMIN' || cleanRole === 'ADMIN' || role === 'ROLE_SUPER_ADMIN' || role === 'ROLE_ADMIN';
+  });
 
   const columns: Column[] = [
-    { key: 'title', label: 'Title' },
+    { key: 'title' as keyof GalleryItem, label: 'Title' },
     { 
-      key: 'description', 
+      key: 'description' as keyof GalleryItem, 
       label: 'Description',
-      render: (value: string) => (
+      render: (value: unknown) => (
         <div className="max-w-md">
-          <p className="truncate" title={value}>
-            {value}
+          <p className="truncate" title={value as string}>
+            {value as string}
           </p>
         </div>
       )
     },
     { 
-      key: 'image', 
+      key: 'image' as keyof GalleryItem, 
       label: 'Image',
-      render: (value: string) => (
+      render: (value: unknown) => (
         value ? (
           <img
-            src={`https://127.0.0.1:8000${value}`}
+            src={`https://127.0.0.1:8000${value as string}`}
             alt="Gallery"
             className="h-16 w-16 object-contain rounded"
           />
         ) : (
-          <span className="text-gray-500">Pas d'image</span>
+          <span className="text-gray-500">No image</span>
         )
       )
     },
     {
-      key: 'published',
+      key: 'published' as keyof GalleryItem,
       label: 'Published',
-      render: (value: boolean) => (
+      render: (value: unknown) => (
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
           value 
             ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' 
             : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
         }`}>
-          {value ? 'Oui' : 'Non'}
+          {value ? 'Yes' : 'No'}
         </span>
       ),
     },
-    {
-      key: 'actions',
+    ...(isAdmin ? [{
+      key: 'actions' as keyof GalleryItem,
       label: 'Actions',
-      render: (value: any, item?: GalleryItem) => {
+      render: (_: unknown, item?: GalleryItem) => {
         if (!item) return null;
         return (
           <div className="flex items-center gap-2">
@@ -87,28 +91,28 @@ const Gallery = () => {
                   ? 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30'
                   : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
-              title={item.published ? 'Dépublier' : 'Publier'}
+              title={item.published ? 'Unpublish' : 'Publish'}
             >
               <Eye className="w-5 h-5" />
             </button>
             <button
               onClick={() => handleEdit(item)}
               className="p-2 text-blue-600 hover:bg-blue-100 rounded-full transition-colors dark:text-blue-400 dark:hover:bg-blue-900/30"
-              title="Modifier"
+              title="Edit"
             >
               <Pencil className="w-5 h-5" />
             </button>
             <button
               onClick={() => handleDelete(item)}
               className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors dark:text-red-400 dark:hover:bg-red-900/30"
-              title="Supprimer"
+              title="Delete"
             >
               <Trash2 className="w-5 h-5" />
             </button>
           </div>
         );
       },
-    },
+    }] : []),
   ];
 
   useEffect(() => {
@@ -117,7 +121,11 @@ const Gallery = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch('https://127.0.0.1:8000/api/admin/gallery');
+      const response = await fetch('https://127.0.0.1:8000/api/admin/gallery', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch gallery items');
       }
@@ -131,9 +139,9 @@ const Gallery = () => {
   };
 
   const handleEdit = (item: GalleryItem) => {
-    setCurrentItem(item);
-    setPreviewImage(item.image ? `https://127.0.0.1:8000${item.image}` : null);
-    setIsModalOpen(true);
+    setSelectedItem(item);
+    setImagePreview(item.image ? `https://127.0.0.1:8000${item.image}` : null);
+    setShowModal(true);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,11 +150,11 @@ const Gallery = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64String = reader.result as string;
-        setPreviewImage(base64String);
+        setImagePreview(base64String);
         // Update form data with base64 string
-        if (currentItem) {
-          setCurrentItem({
-            ...currentItem,
+        if (selectedItem) {
+          setSelectedItem({
+            ...selectedItem,
             image: base64String
           });
         }
@@ -186,13 +194,13 @@ const Gallery = () => {
     const itemData = {
       title: formData.get('title') as string,
       description: formData.get('description') as string,
-      image: previewImage || currentItem?.image || '',
+      image: imagePreview || selectedItem?.image || '',
       published: formData.get('published') === 'true'
     };
 
     try {
-      if (currentItem) {
-        const response = await fetch(`https://127.0.0.1:8000/api/admin/gallery/${currentItem.id}`, {
+      if (selectedItem) {
+        const response = await fetch(`https://127.0.0.1:8000/api/admin/gallery/${selectedItem.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -216,8 +224,8 @@ const Gallery = () => {
           throw new Error('Failed to create gallery item');
         }
       }
-      setIsModalOpen(false);
-      setPreviewImage(null);
+      setShowModal(false);
+      setImagePreview(null);
       fetchItems();
     } catch (error) {
       console.error('Error saving gallery item:', error);
@@ -244,9 +252,9 @@ const Gallery = () => {
   };
 
   const handleCreate = () => {
-    setCurrentItem(null);
-    setPreviewImage(null);
-    setIsModalOpen(true);
+    setSelectedItem(null);
+    setImagePreview(null);
+    setShowModal(true);
   };
 
   if (loading) {
@@ -259,18 +267,21 @@ const Gallery = () => {
         <h1 className="text-2xl font-semibold text-dark-500 dark:text-brand-blanc">
           Gallery
         </h1>
-        <button
-          onClick={handleCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
-        >
-          <Plus className="w-5 h-5" />
-          Ajouter un élément
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-300"
+          >
+            <Plus className="w-5 h-5" />
+            Add Item
+          </button>
+        )}
       </div>
 
       <DataTable
         data={items}
         columns={columns}
+        loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onTogglePublish={handleTogglePublish}
@@ -278,12 +289,12 @@ const Gallery = () => {
       />
 
       <Modal
-        isOpen={isModalOpen}
+        isOpen={showModal}
         onClose={() => {
-          setIsModalOpen(false);
-          setPreviewImage(null);
+          setShowModal(false);
+          setImagePreview(null);
         }}
-        title={currentItem ? "Modifier l'élément" : "Ajouter un élément"}
+        title={selectedItem ? "Edit Item" : "Add Item"}
       >
         <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
           <div>
@@ -297,7 +308,7 @@ const Gallery = () => {
               type="text"
               name="title"
               id="title"
-              defaultValue={currentItem?.title}
+              defaultValue={selectedItem?.title}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
@@ -314,7 +325,7 @@ const Gallery = () => {
               name="description"
               id="description"
               rows={4}
-              defaultValue={currentItem?.description}
+              defaultValue={selectedItem?.description}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
@@ -345,17 +356,17 @@ const Gallery = () => {
                 <Upload className="w-5 h-5" />
                 Choisir une image
               </button>
-              {previewImage && (
+              {imagePreview && (
                 <div className="relative w-20 h-20">
                   <img
-                    src={previewImage}
+                    src={imagePreview}
                     alt="Preview"
                     className="w-full h-full object-contain rounded"
                   />
                   <button
                     type="button"
                     onClick={() => {
-                      setPreviewImage(null);
+                      setImagePreview(null);
                       if (fileInputRef.current) {
                         fileInputRef.current.value = '';
                       }
@@ -382,11 +393,11 @@ const Gallery = () => {
             <select
               name="published"
               id="published"
-              defaultValue={currentItem?.published.toString() || "false"}
+              defaultValue={selectedItem?.published.toString() || "false"}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
             >
-              <option value="true">Oui</option>
-              <option value="false">Non</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
             </select>
           </div>
 
@@ -394,8 +405,8 @@ const Gallery = () => {
             <button
               type="button"
               onClick={() => {
-                setIsModalOpen(false);
-                setPreviewImage(null);
+                setShowModal(false);
+                setImagePreview(null);
               }}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 rounded-md transition-all duration-300"
             >
@@ -405,7 +416,7 @@ const Gallery = () => {
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-md transition-all duration-300"
             >
-              <span>{currentItem ? 'Mettre à jour' : 'Créer'}</span>
+              <span>{selectedItem ? 'Mettre à jour' : 'Créer'}</span>
             </button>
           </div>
         </form>
@@ -418,7 +429,7 @@ const Gallery = () => {
           setItemToDelete(null);
         }}
         onConfirm={handleConfirmDelete}
-        title="Supprimer l'élément"
+        title="Delete Item"
         itemName={itemToDelete?.title || ''}
       />
     </div>

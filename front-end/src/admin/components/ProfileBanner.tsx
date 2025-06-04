@@ -1,12 +1,51 @@
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { Crown, Shield, User } from 'lucide-react';
 
 const ProfileBanner = () => {
   const { user, logout } = useAuth();
-  const { theme } = useTheme();
+
+  const getRoleBadge = () => {
+    const role = user?.roles?.[0];
+    
+    // Remove ROLE_ prefix if it exists
+    const cleanRole = role?.replace('ROLE_', '') || '';
+    
+    if (cleanRole === 'SUPER_ADMIN' || role === 'ROLE_SUPER_ADMIN') {
+      return (
+        <div className="flex items-center gap-2 bg-gradient-to-r from-[#c5ff32] to-[#a3d429] px-3 py-1.5 rounded-full shadow-lg">
+          <Crown className="w-4 h-4 text-black" />
+          <span className="text-xs font-bold text-black">Super Admin</span>
+          <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+        </div>
+      );
+    }
+    
+    if (cleanRole === 'ADMIN' || role === 'ROLE_ADMIN') {
+      return (
+        <div className="flex items-center gap-2 bg-gradient-to-r from-[#c5ff32]/80 to-[#a3d429]/80 px-3 py-1.5 rounded-full shadow-md">
+          <Shield className="w-4 h-4 text-black" />
+          <span className="text-xs font-bold text-black">Admin</span>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="flex items-center gap-2 bg-[#c5ff32]/60 px-3 py-1.5 rounded-full shadow-sm">
+        <User className="w-4 h-4 text-black" />
+        <span className="text-xs font-bold text-black">User</span>
+      </div>
+    );
+  };
 
   return (
     <div className="absolute top-2 right-4 flex items-center space-x-2 bg-brand-blanc dark:bg-dark-500 rounded-full px-4 py-2 shadow-lg backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 border border-primary-200 dark:border-primary-700 transition-all duration-300 hover:shadow-xl hover:scale-105 z-50">
+      {/* Role Badge */}
+      <div className="flex items-center relative">
+        {getRoleBadge()}
+      </div>
+
+      <div className="h-4 w-px bg-primary-200 dark:bg-white/20"></div>
+
       <div className="flex items-center space-x-2">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-md ring-1 ring-primary-200 dark:ring-primary-700">
           <svg
@@ -26,12 +65,11 @@ const ProfileBanner = () => {
           <span className="text-xs font-semibold text-dark-500 dark:text-white">
             {user?.email}
           </span>
-          <span className="text-[10px] font-medium text-primary-600 dark:text-white bg-primary-50 dark:bg-primary-500/20 px-1.5 py-0.5 rounded-full">
-            {user?.role}
-          </span>
         </div>
       </div>
+
       <div className="h-4 w-px bg-primary-200 dark:bg-white/20"></div>
+
       <button
         onClick={logout}
         className="group relative p-1.5 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-300"

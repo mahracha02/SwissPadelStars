@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface User {
   id: number;
@@ -23,18 +24,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
+    
     if (token && storedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setIsAuthenticated(true);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete axios.defaults.headers.common['Authorization'];
+      }
     }
   }, []);
 
   const login = (token: string, userData: User) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setIsAuthenticated(true);
     setUser(userData);
   };
@@ -42,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
     setIsAuthenticated(false);
     setUser(null);
   };

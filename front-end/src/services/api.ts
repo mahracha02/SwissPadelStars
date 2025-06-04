@@ -1,6 +1,6 @@
 import axios, { InternalAxiosRequestConfig, AxiosError } from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'https://127.0.0.1:8000/api';
 
 // Define types for request data
 type RequestData = Record<string, unknown>;
@@ -10,8 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
-  },
-  withCredentials: false
+  }
 });
 
 // Add request interceptor to include auth token
@@ -29,7 +28,6 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Clear token and redirect to login if unauthorized
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/admin/login';
@@ -38,28 +36,101 @@ api.interceptors.response.use(
   }
 );
 
-export const get = async (endpoint: string) => {
-  const response = await api.get(endpoint);
+// Auth methods
+export const login = async (email: string, password: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+    console.log('Login response:', response.data); // Debug log
+    const { token, user } = response.data;
+    
+    if (!token) {
+      throw new Error('No token received from server');
+    }
+    
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+    return response.data;
+  } catch (error) {
+    console.error('Login error:', error); // Debug log
+    throw error;
+  }
+};
+
+export const logout = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No token found during logout');
+      return;
+    }
+    
+    await axios.post(`${API_URL}/auth/logout`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } finally {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
+};
+
+// Admin API methods
+export const getAdminData = async (endpoint: string) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+  
+  console.log('Making request with token:', token); // Debug log
+  
+  const response = await axios.get(`${API_URL}/admin/${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 
-export const post = async (endpoint: string, data: RequestData) => {
-  const response = await api.post(endpoint, data);
+export const postAdminData = async (endpoint: string, data: RequestData) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+  
+  const response = await axios.post(`${API_URL}/admin/${endpoint}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 
-export const put = async (endpoint: string, data: RequestData) => {
-  const response = await api.put(endpoint, data);
+export const putAdminData = async (endpoint: string, data: RequestData) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+  
+  const response = await axios.put(`${API_URL}/admin/${endpoint}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 
-export const del = async (endpoint: string) => {
-  const response = await api.delete(endpoint);
-  return response.data;
-};
-
-export const patch = async (endpoint: string, data: RequestData) => {
-  const response = await api.patch(endpoint, data);
+export const deleteAdminData = async (endpoint: string) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+  
+  const response = await axios.delete(`${API_URL}/admin/${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 

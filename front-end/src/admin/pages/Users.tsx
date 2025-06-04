@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Crown, Shield, User } from 'lucide-react';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import { del } from '../../services/api';
+import del from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface User {
   id: number;
@@ -19,10 +20,11 @@ type UserFormData = Omit<User, 'id'> & {
 };
 
 const Users = () => {
+  const { user: connectedUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
@@ -30,6 +32,19 @@ const Users = () => {
     { 
       key: 'first_name' as keyof User, 
       label: 'Prénom',
+      render: (value: unknown, item?: User) => {
+        const isConnectedUser = item?.email === connectedUser?.email;
+        return (
+          <div className={`flex items-center gap-2 ${isConnectedUser ? 'font-bold' : ''}`}>
+            {String(value)}
+            {isConnectedUser && (
+              <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+                Vous
+              </span>
+            )}
+          </div>
+        );
+      }
     },
     { 
       key: 'last_name' as keyof User, 
@@ -41,20 +56,34 @@ const Users = () => {
     },
     {
       key: 'roles' as keyof User,
-      label: 'Rôles',
+      label: 'Rôle',
       render: (value: unknown) => {
         const roles = Array.isArray(value) ? value : [];
+        // Get the primary role (first non-ROLE_USER role)
+        const primaryRole = roles.find(role => role !== 'ROLE_USER') || 'ROLE_USER';
+        
+        // Remove ROLE_ prefix for display
+        const displayRole = primaryRole.replace('ROLE_', '');
+        let badgeClass = "px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ";
+        let Icon = User;
+        
+        // Different styles and icons based on role
+        if (primaryRole === 'ROLE_SUPER_ADMIN') {
+          badgeClass += "bg-gradient-to-r from-[#c5ff32] to-[#a3d429] text-black shadow-md";
+          Icon = Crown;
+        } else if (primaryRole === 'ROLE_ADMIN') {
+          badgeClass += "bg-gradient-to-r from-[#c5ff32]/80 to-[#a3d429]/80 text-black";
+          Icon = Shield;
+        } else {
+          badgeClass += "bg-[#c5ff32]/60 text-black";
+          Icon = User;
+        }
+
         return (
-          <div className="flex gap-2">
-            {roles.map((role, index) => (
-              <span 
-                key={index}
-                className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
-              >
-                {role}
-              </span>
-            ))}
-          </div>
+          <span className={badgeClass}>
+            <Icon className="w-3.5 h-3.5" />
+            {displayRole}
+          </span>
         );
       }
     },
@@ -105,7 +134,7 @@ const Users = () => {
   };
 
   const handleEdit = (user: User) => {
-    setCurrentUser(user);
+    setSelectedUser(user);
     setIsModalOpen(true);
   };
 
@@ -141,22 +170,23 @@ const Users = () => {
     };
 
     // Add password only for new users
-    if (!currentUser) {
+    if (!selectedUser) {
       userData.password = formData.get('password') as string;
     }
 
     try {
-      const url = currentUser 
-        ? `https://127.0.0.1:8000/api/admin/users/${currentUser.id}`
+      const url = selectedUser 
+        ? `https://127.0.0.1:8000/api/admin/users/${selectedUser.id}`
         : 'https://127.0.0.1:8000/api/admin/users';
       
       console.log('Sending user data:', userData);
       
       const response = await fetch(url, {
-        method: currentUser ? 'PUT' : 'POST',
+        method: selectedUser ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(userData),
       });
@@ -185,7 +215,7 @@ const Users = () => {
   };
 
   const handleCreate = () => {
-    setCurrentUser(null);
+    setSelectedUser(null);
     setIsModalOpen(true);
   };
 
@@ -222,7 +252,7 @@ const Users = () => {
         onClose={() => {
           setIsModalOpen(false);
         }}
-        title={currentUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
+        title={selectedUser ? "Modifier l'utilisateur" : "Ajouter un utilisateur"}
       >
         <form onSubmit={handleSubmit} className="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
           <div>
@@ -236,7 +266,7 @@ const Users = () => {
               type="text"
               name="first_name"
               id="first_name"
-              defaultValue={currentUser?.first_name}
+              defaultValue={selectedUser?.first_name}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
@@ -253,7 +283,7 @@ const Users = () => {
               type="text"
               name="last_name"
               id="last_name"
-              defaultValue={currentUser?.last_name}
+              defaultValue={selectedUser?.last_name}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
@@ -270,7 +300,7 @@ const Users = () => {
               type="email"
               name="email"
               id="email"
-              defaultValue={currentUser?.email}
+              defaultValue={selectedUser?.email}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
@@ -287,7 +317,7 @@ const Users = () => {
               type="text"
               name="roles"
               id="roles"
-              defaultValue={currentUser?.roles.join(', ')}
+              defaultValue={selectedUser?.roles.join(', ')}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
@@ -304,13 +334,13 @@ const Users = () => {
               type="tel"
               name="phone"
               id="phone"
-              defaultValue={currentUser?.phone}
+              defaultValue={selectedUser?.phone}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
               required
             />
           </div>
 
-          {!currentUser && (
+          {!selectedUser && (
             <div>
               <label
                 htmlFor="password"
@@ -323,7 +353,7 @@ const Users = () => {
                 name="password"
                 id="password"
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm"
-                required={!currentUser}
+                required={!selectedUser}
                 placeholder="Mot de passe temporaire pour la première connexion"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -344,7 +374,7 @@ const Users = () => {
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-md transition-all duration-300"
             >
-              <span>{currentUser ? 'Mettre à jour' : 'Créer'}</span>
+              <span>{selectedUser ? 'Mettre à jour' : 'Créer'}</span>
             </button>
           </div>
         </form>

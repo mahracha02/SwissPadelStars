@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
-import { Box, Star, Calendar, Handshake, CheckCircle, ChevronLeft, ChevronRight, Image } from 'lucide-react';
-import Slider from "react-slick";
-import Professionnel1 from '../assets/images/professionnel1.png';
-import Professionnel2 from '../assets/images/professionnel2.png';
-import Professionnel3 from '../assets/images/professionnel3.png';
+import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import Logo from '../assets/images/logo2.png';
 import contactImg1 from '../assets/images/contactImage1.png';
 import avatar1 from '../assets/images/avatar1.png';
 import avatar2 from '../assets/images/avatar2.png';
 import avatar3 from '../assets/images/avatar3.png';
 import PartnersSection from '../layout/PartnersSection';
+
+interface Service {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+}
 
 const feedbacks = [
   {
@@ -32,7 +35,25 @@ const feedbacks = [
 
 const Professionnel: React.FC = () => {
   const [start, setStart] = React.useState(0);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
   const visible = 3;
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('https://127.0.0.1:8000/api/professional-services');
+        const data = await response.json();
+        setServices(data);
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   const prev = () => setStart((s) => (s - 1 + feedbacks.length) % feedbacks.length);
   const next = () => setStart((s) => (s + 1) % feedbacks.length);
@@ -68,168 +89,36 @@ const Professionnel: React.FC = () => {
         {/* Services Grid */}
         <section className="py-12 sm:py-16 md:py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 lg:gap-24">
-              {/* Image */}
-              <div className="w-full md:w-1/2">
-                <img 
-                  src={Professionnel1} 
-                  alt="Entreprises et banques" 
-                  className="w-full h-auto rounded-2xl shadow-lg" 
-                />
+            {loading ? (
+              <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#c5ff32]"></div>
               </div>
-
-              {/* Text */}
-              <div className="w-full md:w-1/2">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8">
-                  Entreprises et banques
-                </h1>
-                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-800 leading-relaxed">
-                  Offrez un espace unique pour vos collaborateurs ou 
-                  clients, alliant innovation et bien-être.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-12 sm:py-16 md:py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row-reverse items-center gap-8 md:gap-16 lg:gap-24">
-              {/* Text */}
-              <div className="w-full md:w-1/2">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8">
-                  Hôtels et centres de loisirs
-                </h1>
-                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-800 leading-relaxed">
-                  Enrichissez vos offres avec des terrains de padel 
-                  modernes et attractifs.
-                </p>
-              </div>
-
-              {/* Image */}
-              <div className="w-full md:w-1/2">
-                <img 
-                  src={Professionnel2} 
-                  alt="Hôtels et centres de loisirs" 
-                  className="w-full h-auto rounded-2xl shadow-lg" 
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-12 sm:py-16 md:py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 lg:gap-24">
-              {/* Image */}
-              <div className="w-full md:w-1/2">
-                <img 
-                  src={Professionnel3} 
-                  alt="Collectivités et clubs sportifs" 
-                  className="w-full h-auto rounded-2xl shadow-lg" 
-                />
-              </div>
-
-              {/* Text */}
-              <div className="w-full md:w-1/2">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8">
-                  Collectivités et clubs sportifs
-                </h1>
-                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-800 leading-relaxed">
-                  Modernisez vos infrastructures et favorisez l'accès au 
-                  padel pour tous.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Services Timeline Section */}
-        <section className="py-12 sm:py-16 md:py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-12 md:mb-16">
-              Services mis à votre disposition
-            </h2>
-
-            <div className="max-w-4xl mx-auto">
-              {/* Timeline items */}
-              <div className="relative">
-                {/* Vertical line */}
-                <div className="absolute left-[26px] top-0 bottom-0 w-[4px] bg-[#c5ff32]"></div>
-
-                {/* Service 1 */}
-                <div className="relative flex items-start mb-12 md:mb-16">
-                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#c5ff32] flex items-center justify-center z-10">
-                    <span className="text-xl sm:text-2xl font-bold text-black">1</span>
-                  </div>
-                  <div className="ml-4 sm:ml-8 flex-grow">
-                    <div className="flex items-center gap-3 sm:gap-4 mb-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Box className="w-10 h-10 sm:w-12 sm:h-12 text-black" />
-                      </div>
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">CONCEPTION ET INSTALLATION</h3>
+            ) : (
+              services.map((service, index) => (
+                <div key={service.id} className="mb-38 last:mb-0">
+                  <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 lg:gap-24 ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+                    {/* Image */}
+                    <div className="w-full md:w-1/2">
+                      <img 
+                        src={`https://127.0.0.1:8000${service.image}`} 
+                        alt={service.title} 
+                        className="w-full h-auto rounded-2xl shadow-lg" 
+                      />
                     </div>
-                    <p className="text-base sm:text-lg text-gray-600 ml-4 sm:ml-16">
-                      Des terrains sur mesure répondant aux normes internationales.
-                    </p>
+
+                    {/* Text */}
+                    <div className="w-full md:w-1/2">
+                      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8">
+                        {service.title}
+                      </h1>
+                      <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-800 leading-relaxed">
+                        {service.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-
-                {/* Service 2 */}
-                <div className="relative flex items-start mb-12 md:mb-16">
-                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#c5ff32] flex items-center justify-center z-10">
-                    <span className="text-xl sm:text-2xl font-bold text-black">2</span>
-                  </div>
-                  <div className="ml-4 sm:ml-8 flex-grow">
-                    <div className="flex items-center gap-3 sm:gap-4 mb-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Star className="w-10 h-10 sm:w-12 sm:h-12 text-black" />
-                      </div>
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">SPONSORING ET BRANDING</h3>
-                    </div>
-                    <p className="text-base sm:text-lg text-gray-600 ml-4 sm:ml-16">
-                      Intégrez le padel dans votre stratégie marketing.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Service 3 */}
-                <div className="relative flex items-start mb-12 md:mb-16">
-                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#c5ff32] flex items-center justify-center z-10">
-                    <span className="text-xl sm:text-2xl font-bold text-black">3</span>
-                  </div>
-                  <div className="ml-4 sm:ml-8 flex-grow">
-                    <div className="flex items-center gap-3 sm:gap-4 mb-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Calendar className="w-10 h-10 sm:w-12 sm:h-12 text-black" />
-                      </div>
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">ORGANISATION D'ÉVÉNEMENTS</h3>
-                    </div>
-                    <p className="text-base sm:text-lg text-gray-600 ml-4 sm:ml-16">
-                      Tournois et initiatives exclusives pour dynamiser votre image.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Service 4 */}
-                <div className="relative flex items-start mb-12 md:mb-16">
-                  <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#c5ff32] flex items-center justify-center z-10">
-                    <span className="text-xl sm:text-2xl font-bold text-black">4</span>
-                  </div>
-                  <div className="ml-4 sm:ml-8 flex-grow">
-                    <div className="flex items-center gap-3 sm:gap-4 mb-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
-                        <Handshake className="w-10 h-10 sm:w-12 sm:h-12 text-black" />
-                      </div>
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold">ACCOMPAGNEMENT COMPLET</h3>
-                    </div>
-                    <p className="text-base sm:text-lg text-gray-600 ml-4 sm:ml-16">
-                      Audit, conseils et suivi à chaque étape de votre projet.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </section>
 

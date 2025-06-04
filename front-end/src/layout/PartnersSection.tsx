@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { get } from '../services/api';
 
 interface Partner {
   id: number;
@@ -36,7 +35,11 @@ const PartnersSection = ({
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const data = await get('/partners');
+        const response = await fetch('https://127.0.0.1:8000/api/partners');
+        if (!response.ok) {
+          throw new Error('Failed to fetch partners');
+        }
+        const data = await response.json();
         setPartners(data);
       } catch (error) {
         console.error('Error fetching partners:', error);
@@ -77,9 +80,9 @@ const PartnersSection = ({
           <div className="absolute inset-0">
             {partner.image ? (
               <img 
-                src={`http://localhost:8000${partner.image}`}
+                src={`https://127.0.0.1:8000${partner.image}`}
                 alt={partner.name}
-                className="w-full h-full object-cover "
+                className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
