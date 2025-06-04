@@ -3,7 +3,7 @@ import { Plus, Pencil, Trash2, Crown, Shield, User } from 'lucide-react';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
-import { del } from '../../services/api';
+import del from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface User {
@@ -170,22 +170,23 @@ const Users = () => {
     };
 
     // Add password only for new users
-    if (!connectedUser) {
+    if (!selectedUser) {
       userData.password = formData.get('password') as string;
     }
 
     try {
-      const url = connectedUser 
-        ? `https://127.0.0.1:8000/api/admin/users/${connectedUser.id}`
+      const url = selectedUser 
+        ? `https://127.0.0.1:8000/api/admin/users/${selectedUser.id}`
         : 'https://127.0.0.1:8000/api/admin/users';
       
       console.log('Sending user data:', userData);
       
       const response = await fetch(url, {
-        method: connectedUser ? 'PUT' : 'POST',
+        method: selectedUser ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(userData),
       });

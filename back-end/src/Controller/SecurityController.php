@@ -3,67 +3,106 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 #[Route('/api')]
 class SecurityController extends AbstractController
 {
-    public function __construct(
-        private UserRepository $userRepository,
-        private UserPasswordHasherInterface $passwordHasher,
-        private EntityManagerInterface $entityManager
-    ) {}
+    private $entityManager;
+    private $jwtTokenManager;
+    private $tokenStorage;
 
-    #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request): JsonResponse
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        JWTTokenManagerInterface $jwtTokenManager,
+        TokenStorageInterface $tokenStorage
+    ) {
+        $this->entityManager = $entityManager;
+        $this->jwtTokenManager = $jwtTokenManager;
+        $this->tokenStorage = $tokenStorage;
+    }
+
+    #[Route('/auth/login', name: 'api_auth_login', methods: ['POST'])]
+    public function login(Request $request, AuthenticationException $authException = null): JsonResponse
     {
+        if ($authException) {
+            return new JsonResponse(['error' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
+        }
+
         try {
             $data = json_decode($request->getContent(), true);
+            $email = $data['email'] ?? '';
+            $password = $data['password'] ?? '';
 
-            if (!$data || !isset($data['email']) || !isset($data['password'])) {
-                return new JsonResponse([
-                    'message' => 'Invalid request data'
-                ], Response::HTTP_BAD_REQUEST);
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+            if (!$user) {
+                return new JsonResponse(['error' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
             }
 
-            $user = $this->userRepository->findOneBy(['email' => $data['email']]);
+            // Generate JWT token
+            $token = $this->jwtTokenManager->create($user);
 
-            if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-                return new JsonResponse([
-                    'message' => 'Invalid credentials'
-                ], Response::HTTP_UNAUTHORIZED);
-            }
+            // Store token in user entity
+            $user->setToken($token);
+            $user->setTokenExpiresAt(new \DateTimeImmutable('+24 hours')); // Token expires in 24 hours
+
+            // Save the user with the new token
+            $this->entityManager->flush();
+
+            // Format roles for frontend (remove ROLE_ prefix)
+            $roles = array_map(function($role) {
+                return str_replace('ROLE_', '', $role);
+            }, $user->getRoles());
 
             return new JsonResponse([
-                'message' => 'Login successful',
                 'user' => [
                     'id' => $user->getId(),
                     'email' => $user->getEmail(),
-                    'roles' => $user->getRoles(),
-                    'firstName' => $user->getFirstName(),
-                    'lastName' => $user->getLastName(),
-                    'phone' => $user->getPhone()
-                ]
+                    'first_name' => $user->getFirstName(),
+                    'last_name' => $user->getLastName(),
+                    'roles' => $roles,
+                    'phone' => $user->getPhone(),
+                ],
+                'token' => $token
             ]);
         } catch (\Exception $e) {
-            return new JsonResponse([
-                'message' => 'An error occurred during login'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(['error' => 'Authentication failed'], Response::HTTP_UNAUTHORIZED);
         }
     }
 
-    #[Route('/logout', name: 'api_logout', methods: ['POST'])]
+    #[Route('/auth/logout', name: 'api_auth_logout', methods: ['POST'])]
     public function logout(Request $request): JsonResponse
     {
-        return new JsonResponse([
-            'message' => 'Logout successful'
-        ]);
+        try {
+            $token = $request->headers->get('Authorization');
+            if ($token) {
+                $token = str_replace('Bearer ', '', $token);
+                $user = $this->entityManager->getRepository(User::class)
+                    ->findOneBy(['token' => $token]);
+
+                if ($user) {
+                    $user->setToken(null);
+                    $user->setTokenExpiresAt(null);
+                    $this->entityManager->flush();
+                }
+            }
+
+            return new JsonResponse(['message' => 'Successfully logged out']);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Logout failed'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
